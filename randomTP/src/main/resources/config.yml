@@ -1,0 +1,11 @@
+#The number of minutes after executing the command the player has to wait before he/she can use it again.
+#TimeLimit: 0 <-- For no time limit, meaning they can use it as many times as they'd like.
+TimeLimit: 2
+
+#Message to send to player telling him/her they are being teleported
+#AlertMSG: disable <-- To disable
+AlertMSG: "&bTeleporting you to a random location in the wilderness!"
+
+#Message to send to player telling them they cannot use the command again for X amount of minutes
+#<x> will be replaced with the number of minutes remaining
+CooldownMSG: "&bYou cannot use that command again for <x> minutes!"

@@ -1,0 +1,10 @@
+#Time in minutes the plugin should remove dropped items / entities
+timeDelay: 6
+
+# Message sent to the server 1 minute before items are deleted.
+# warnMSG: disable <- to disable
+warnMSG: "&3[Drop Removal] &bRemoving all dropped items in 1 minute. Pick them up or lose them!"
+
+#You have the option to also kill mobs while running this sweep.
+mobs: all
+#options are "all" "passive" "aggressive" "none"

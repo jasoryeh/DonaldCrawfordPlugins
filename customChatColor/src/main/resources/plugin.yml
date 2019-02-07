@@ -1,0 +1,9 @@
+name: Custom Chat Color
+main: com.gmail.dejayyy.customChat.ccMain
+description: 'Creates a custom chat color for players.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  chatcolor:
+  

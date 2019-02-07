@@ -1,0 +1,28 @@
+name: Roll The Dice
+main: dejay.rollDice
+description: 'Basically a luck of the draw game. 
+You type /rtd and if you land on the right number you win!'
+version: 1.1
+author: ImDeJay
+softdepend: [Vault]
+
+
+commands:
+   rollthedice:
+    description: Roll the dice for a chance to win!
+    usage: /<command>
+    aliases: rtd
+
+permissions:
+  rollthedice.*:
+    description: Give access to all rtd commands!
+    default: op
+    children:
+      rollthedice.use: true
+      rollthedice.reload: true
+  rollthedice.use:
+    description: Allow users to run the /rtd command.
+    default: true
+  rollthedice.reload:
+    description: Allow the user to reload the config file.
+    default: op

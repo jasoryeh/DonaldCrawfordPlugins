@@ -1,0 +1,9 @@
+name: customMOTD
+main: com.gmail.dejayyy.customMotd.cmMain
+description: 'Display a custom MOTD for each player!'
+version: 1.0
+author: ImDeJay
+
+commands:
+  custommotd:
+    aliases: cmotd

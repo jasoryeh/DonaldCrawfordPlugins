@@ -1,0 +1,32 @@
+name: killMobs
+main: dejay.killMobs
+description: Remove mobs from the server.
+version: 1.1
+author: ImDeJay
+ 
+commands:
+  killmobs:
+    description: Kill mobs on the server.
+    usage: /<command>
+    aliases: km
+    permission-message: You don't have permission to run this command!
+ 
+permissions:
+  killmobs.*:
+    description: Give access to all killMobs commands
+    default: op
+    children:
+      killMobs.kill.all: true
+# Basically the same as above, but might be needed if you are going to add more
+  killmobs.kill.all:
+    description: Give access to all killmobs kill commands
+    default: op
+    children:
+      killmobs.kill.passive: true
+      killmobs.kill.hostile: true
+  killmobs.kill.passive:
+    description: Kill all passive mobs.
+    default: op
+  killmobs.kill.hostile:
+    description: Kill all hostile mobs.
+    default: op

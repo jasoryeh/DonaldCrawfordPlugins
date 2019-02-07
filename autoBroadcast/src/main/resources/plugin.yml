@@ -1,0 +1,8 @@
+name: Auto Broadcaster
+main: com.gmail.dejayyy.autoBroadcast.abMain
+description: 'Lets Spam Chat!!!'
+version: 1.0
+author: ImDeJay
+
+commands:
+  ab:

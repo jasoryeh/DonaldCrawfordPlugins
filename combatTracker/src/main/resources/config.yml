@@ -1,0 +1,36 @@
+# combatTracker config
+
+# Message sent to player when put into combat.
+# combatMSG: disable <- to disable
+combatMSG: "&3[combatTracker] &bYou are now in combat!"
+
+# Message sent to player when no longer in combat.
+# noCombatMSG: disable <- to disable
+noCombatMSG: "&3[combatTracker] &bYou are no longer in combat!"
+
+# Time(in seconds) a player should remain in combat
+combatTime: 10
+
+# Message sent to player when trying to use a disabled command
+cmdDisabled: "&3[combatTracker] &bCommand disabled in combat!"
+
+# Message displayed to the server when a player combat logs.
+# broadcastMSG: disable <- to disable.
+broadcastMSG: "&3[combatTracker] &b<player> just logged out during combat! What a wimp."
+
+# Worlds in which this plugin should ignore.
+IgnoredWorlds:
+  - world_nether
+# Commands to disable while a player is in combat.
+cmdsDisabled:
+  - tpa
+  - tpahere
+  - spawn
+  - home
+  - warp
+
+# Set this to true if you want ALL commands disabled during combat.
+disableAll: false
+
+# Set this to true if you'd like to kill the players the combat log.
+killOnLogout: true

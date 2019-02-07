@@ -1,0 +1,9 @@
+name: Remove Drops
+main: com.gmail.dejayy.removeDrops.rdMain
+description: 'Remove dropped items from the world. Another attempt at reducing server lag.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  removedrops:
+    aliases: rd

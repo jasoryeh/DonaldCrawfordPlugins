@@ -1,0 +1,9 @@
+# The time(in seconds) between each message
+broadcastDelay: 120
+
+Prefix: "&3[Broadcast]"
+
+Messages:
+ - "First message"
+ - "Second Message"
+ - "Last Message"

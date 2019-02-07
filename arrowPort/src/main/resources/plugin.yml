@@ -1,0 +1,10 @@
+name: tpArrow
+main: com.gmail.dejayyy.arrowPort
+description: 'A replacement for Ender Pearls. Shoot an arrow from specified item and teleport to where arrow lands.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  tparrow:
+    usage: /<command>
+    permisison: tpArrow.use 

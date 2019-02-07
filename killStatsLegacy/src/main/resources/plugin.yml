@@ -1,0 +1,10 @@
+name: killStats
+main: com.gmail.dejayyy.killStats.Main
+description: 'Statistics for each players kills/deaths.'
+version: 1.2
+author: ImDeJay
+
+commands:
+  killstats:
+    aliases: ks
+    usage: /<command>

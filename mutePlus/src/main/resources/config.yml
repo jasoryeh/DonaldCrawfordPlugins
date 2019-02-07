@@ -1,0 +1,6 @@
+#Would you like to tell the person they are muted if they try to chat?
+AlertPlayer: true
+
+#What message would you like to give the player when they try to chat?
+#AlertPlayer must be set to true
+AlertMessage: "&cYou are not allowed to chat."

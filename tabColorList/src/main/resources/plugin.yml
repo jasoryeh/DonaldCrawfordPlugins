@@ -1,0 +1,5 @@
+name: Colored Tab List
+main: com.gmail.dejayyy.coloredTab.tabMain
+description: 'Color the names in the tab list. Based on groups.'
+version: 1.0
+author: ImDeJay

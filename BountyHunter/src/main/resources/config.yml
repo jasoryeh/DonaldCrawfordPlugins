@@ -1,0 +1,14 @@
+#BountyHunter Config
+
+# Replacement Legend:
+# <targetplayer> - The player that was added to the bounty list.
+# <player> - The player that offers the reward.
+# <reward> - The amount of money that is offered as reward.
+
+# Message sent to the player that was just added to the bounty list.
+# alertMSG: disable <- to disable.
+alertMSG: "&3<player> added you to the bounty list. Better watch out, $<reward> is being offered for your death!"
+
+# Message broadcasted to the server when a player has been added to the bounty list.
+#broardcastMSG: disable <- to disable.
+broadcastMSG: "&3A reward of $<reward> is being offered for the death of <targetplayer>."

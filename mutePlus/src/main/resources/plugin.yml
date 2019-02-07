@@ -1,0 +1,20 @@
+name: mutePlus
+main: com.gmail.dejayyy.cmdExec
+description: 'A more advanced mute plugin.'
+version: 1.0
+author: ImDeJay
+
+
+commands:
+  mute:
+    description: Mute specified player.
+    usage: /<command>
+    permission: mutePlus.use
+  unmute:
+    description: Unmute specified player.
+    usage: /<command>
+    permission: mutePlus.use
+  muteinfo:
+    description: View the person who banned and reason.
+    usage: /<command>
+    permission: mutePlus.use 

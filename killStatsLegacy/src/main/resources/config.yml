@@ -1,0 +1,112 @@
+configversion: 2.6
+
+#Log admin actions
+#Logs all actions that are taken by a killstats admin
+LogActions: true
+
+#Set this to true if you'd like to use a mySQL database
+#If false, all information is stored inside 'players.yml'
+UseDatabase: false
+
+#Database information
+#Only relevant if UseDatabase = true
+dbHost: 127.0.0.1
+dbPort: 3306
+dbName: minecraft
+dbUsername: killStatsUser
+dbPassword: killStatsPass
+
+#Set this to true if you wish to use the scoreboard feature
+#Scoreboard will only work to show player stats, not top players
+ScoreboardEnabled: false
+
+#This is the number of seconds a scoreboard will stay on the players screen when they are checking a players stats
+ScoreboardDisplayTime: 7
+
+#When a player types /ks top what will be shown by default without them adding a certain search criteria.
+#Options: kills,deaths,ratio,streak
+DefaultTopType: kills
+
+#If set to false, deaths from natural causes/mobs will count towards the players deaths
+OnlyPvPDeaths: true
+
+#Worlds in this list will have their own set of stats. World names are CaSeSeNsItIvE
+SeperateWorlds:
+  - Seperate_World
+
+IgnoredWorlds:
+  - Ignored_World
+  
+#Enable this if you'd like this plugin to handle the dropping of a players head upon death.
+DropHead: true
+
+#Broadcast message on specified killstreaks.
+broadcastStreak: true
+
+# Should this plugin detect kill boosting and stop it?
+AntiBoostEnabled: true
+
+# A player can only kill another player a certaion amount of times within this amount of minutes? idk how to explain it lol.
+TimeLimit: 5
+
+# How many times is a player allowed to kill another player withing the givin time limit above?
+MaxKilling: 3
+
+# Message to send to the player to alert him/her that they are boosting and will not receive points
+# <player> <-- will get replaced with the victims name
+#BoosterAlert: disable <-- to disable
+BoosterAlert: '&3[AntiBoost] &bYour account has been flagged for boosting! Your kills will not be counted toward your killStats profile.'
+
+#Streaks to be alerted, plus the message to send.
+#broadcastStreak must be set to true.
+#<player> will be replaced with the player name.
+#<streak> will be replaced with the killstreak.
+StreaksToBroadcast:
+  5: "&b<player>&3 is on a &b<streak> &3killstreak!"
+  10: "&b<player> &3is owning everybody with a &b<streak> &3killstreak!"
+  
+#Broadcast message when a killstreak is broken.
+BroadcastBrokenStreak: true
+
+#Killstreak must be over this number in order to broadcast.
+#Saves the chat from being spammed when a player loses a killstreak of 1 or 2.
+MinimumStreak: 10
+
+#Message to be broadcasted on broken killstreak
+#BroadcastBrokenStreak must be set to true.
+#<victim> will be replaced with the person that was killed.
+#<killer> will be replaced with the person that killed <victim>
+#<streak> will be replaced with the killstreak.
+BrokenStreakMessage: "&b<killer> &3just ruined &b<victim>&3's killstreak of &3<streak>"
+
+#Give a player rewards on each specified killstreak.
+RewardsEnabled: true
+
+#Alert the player that he/she has received a reward for getting a specific killstreak.
+AlertPlayer: true
+
+#Message to send to player alerting them they've received a reward
+AlertPlayerMessage: "&3[killStats] &bYou've been rewarded some free items for getting a <streak> killstreak!"
+
+#This is the streaks that each reward is given on.
+#RewardsEnabled mst be set to true.
+#The item to be given MUST be an ID, else it will not work.
+#  5: <-- killstreak number
+#    1: 373:16273;2 <- First reward
+#    2: 264;10 <- second reward
+# Format: [ItemID]:[Amount]
+#You can give as many rewards as you'd like.
+Rewards:
+  5: 
+    1: 373:16273;2
+    2: 264;10
+
+  10:
+    1: 264;25
+    2: 373:16382;2
+
+#You can also run a command as a killstreak reward. Example below.
+#All commands are sent as OP.
+#  5: 
+#    1: 373:16273;2
+#    2: command;/xp give <player> 825 <-- would give the player 825 XP. 

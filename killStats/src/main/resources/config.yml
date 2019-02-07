@@ -1,0 +1,46 @@
+configVersion: 3.0
+
+Disabled_Worlds:
+  - World_Name_1
+  - World_Name_2
+
+Seperate_Worlds:
+  - World_Name_1
+  - World_Name_2
+
+Top_Stats:
+  Update: 20
+  Limit: 1000
+
+MySQL:
+  Enabled: false
+  Host: 127.0.0.1
+  Port: 3306
+  dbName: minecraft
+  Username: killStatsUser
+  Password: killStatsPass
+
+AntiBoost:
+  Enabled: true
+  Time_Limit: 5
+  Max_Killing: 3
+
+Startover_Cooldown: 15
+
+Drop_Head:
+  Enabled: true
+  Percentage: 100
+
+Broadcast_Broken_Streak:
+  Enabled: true
+  Minimum_Streak_To_Broadcast: 10
+
+Rewards_Enabled: false
+
+Scoreboard_Display_Time: 6
+
+Allow_Scoreboard: True
+
+Streaks_To_Broadcast:
+  5: "&b%killer.name%&3 is on a &b%killer.streak% &3killstreak!"
+  10: "&b%killer.name% &3is owning everybody with a &b%killer.streak% &3killstreak!"

@@ -1,0 +1,57 @@
+name: killStats
+main: com.gmail.dejayyy.killStats.ksMain
+description: 'PvP based statistics plugin.'
+version: 3.0
+prefix: killStats
+author: ImDeJay
+
+commands:
+  killstats:
+    aliases: ks
+    usage: |
+       /ks - View your personal stats.
+       /ks [playername] - View another players stats.
+       /ks scoreboard - Enable/disable the scoreboard feature.
+       /ks startover - Reset all your stats. This cannot be un-done.
+       /ks top [kills|deaths|streak|ratio] - View the top players within the given parameters.
+    
+  killstatsadmin:
+    aliases: ksa
+    usage: |
+      /ksa reset [playername] - Reset a players stats.
+      /ksa head [playername] - Get the head of the given player.
+      /ksa reload - Reload killStats data files
+      /ksa enable - Enable the plugin.
+      /ksa disable - Disable the plugin.
+      
+      
+permissions:
+  killstats.*:
+    children:
+      killstats.player.startover:
+        default: true
+        description: Allow a player to reset their own statistics.
+      
+  killstats_admin.*:
+    default: op
+    children:
+      killstats_admin.reload: false
+      killstats_admin.enable_disable: false
+      killstats_admin.player_head: false
+      killstats_admin.reset_players: false
+      killstats.admin.createsign: false
+  killstats_admin.reload:
+    default: op
+    description: Reload killStats data files.
+  killstats_admin.enable_disable:
+    default: op
+    description: Enable/Disable the plugin.
+  killstats_admin.player_head:
+    default: op
+    description: Retrieve a players head upon command.
+  killstats_admin.reset_players:
+    default: op
+    description: Reset another players statistics
+  killstats.admin.createsign:
+    default: op
+    description: Create a leaderboard sign.

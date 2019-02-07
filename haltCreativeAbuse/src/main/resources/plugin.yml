@@ -1,0 +1,8 @@
+name: HaltCreativeAbuse
+main: com.gmail.dejayyy.antiFly.antiFly
+description: 'Stop certain aspects of creative from being used while in creative.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  hca:

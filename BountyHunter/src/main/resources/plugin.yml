@@ -1,0 +1,10 @@
+name: Bounty Hunter
+main: com.gmail.dejayyy.bountyHunter.bhMain
+description: 'Put a bounty on a players head.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  bounty:
+    usage: /<command>
+    aliases: bh

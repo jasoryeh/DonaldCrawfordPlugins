@@ -1,0 +1,8 @@
+name: noAds
+main: com.gmail.dejayyy.noAds.naMain
+description: 'No more advertisements!'
+version: 1.0
+author: ImDeJay
+
+commands:
+  noads:

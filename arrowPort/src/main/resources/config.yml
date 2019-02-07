@@ -1,0 +1,39 @@
+# tpArrow default config.
+# Color codes are allowed in messages.
+
+# Time(in seconds) the user must wait between using tpArrow
+CDAmount: 30
+
+# Item required to use tpArrow. This plugin relies on itemID's. not item names.
+# RequiredItem: 0 <- to disable requiring an item.
+RequiredItem: 262
+
+# Message displayed to alert the player he/she doesnt have the required item to use tpArrow
+# NoItem: "disable" <- to disable
+NoItem: "&bYou must have arrows in order to use tpArrow!"
+
+# Message displayed when a player uses tpArrow to inform them tpArrow is going on cooldown.
+# preCDMessage: disable <- to disable this message.
+preCDMessage: '&6You wont be able to use tpArrow again for <cooldown> seconds.'
+
+# Message displayed when a player tries to use tpArrow during the cooldown period.
+#CDMessage: disable <- to disable this message.
+CDMessage: '&6Sorry, tpArrow is currently on cooldown!'
+
+#Message displayed when the cooldown for tpArrow is over
+#CDRefreshed: disable <-- to disable
+CDRefreshed: "&6tpArrow is ready!"
+
+#Should a player be allowed to use tpArrow if they are in combat?
+#combatTracker is required in order for this to work
+#http://dev.bukkit.org/server-mods/combattracker/
+#must be true/false
+DisableInCombat: true
+
+#Message to send to player if they are in combat, and not allowed to use tpArrow
+#DisabledMessage: disable <-- to disable
+DisabledMessage: "&6You are not permitted to use this while in combat!"
+
+# Worlds in which all commands etc will be ignored
+IgnoredWorlds:
+  - Ignored_World

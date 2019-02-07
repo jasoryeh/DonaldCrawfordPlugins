@@ -1,0 +1,6 @@
+#The websites in which will be white listed.
+#Do not include www. or http:// just the domiain... example "minecraft.net" not "www.minecraft.net"
+WhiteList:
+  - minecraft.net
+  
+debugmode: false

@@ -1,0 +1,11 @@
+name: ShowInvisible
+main: com.gmail.dejayyy.showInvisi.siMain
+description: 'Show nearby players that are invisible.'
+version: 1.0
+author: ImDeJay
+
+
+commands:
+  showinvisible:
+    aliases: si
+    permission: showinvisible.use

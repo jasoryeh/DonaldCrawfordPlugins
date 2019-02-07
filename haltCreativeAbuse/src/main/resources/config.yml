@@ -1,0 +1,48 @@
+#Amount seconds you want the commands disabled for
+seconds: 20
+
+#Regular commands that will be blocked if you are in creative
+BlockedCommands:
+  - pv
+  - playervaults
+  - vault
+  
+#The commands which will be disabled for the X amount of seconds
+#Do not include the slash "/"
+DisabledCommands:
+  - fly
+  - gm
+  - efly
+  - gamemode
+  - lc
+  - limitedcreative
+
+# Disable PVP while in creative/fly
+DisableFlyPVP: true
+
+# Show debug information to the player with permission "hca.debuginfo"
+Debug: true
+
+# Disable the use of splash potions while in creative
+DisableSplashPotions: true
+
+#Disable the use of spawn eggs
+DisableSpawneggs: true
+
+# PlaterInteractEvent
+RightClickBlock:
+  - 146
+  - 373
+  - 383
+  - 146
+  
+RightClickAir:
+  - 146
+  - 373
+  - 383
+  - 146
+#PlayerInteractEntityEvent
+RightClicked:
+  - 46
+  - 43
+  - 44

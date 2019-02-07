@@ -1,0 +1,15 @@
+# Commands that you do not wish to log.
+# Do not include the /
+IgnoredCommands:
+  - spawn
+  - home
+  - warp
+  - sethome
+  - delhome
+  
+#Log the commands each player sends
+LogData: true
+
+#Permissions
+# commandSpy.bypass - If a player has this permission, the commands he/she issues will not be logged
+# commandSpy.spy - Players with this permission can see what commands other players execute in-game.

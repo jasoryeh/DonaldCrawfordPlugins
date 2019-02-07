@@ -1,0 +1,34 @@
+# You can use colors for any messages sent.
+# View colors available: http://www.minecraftwiki.net/wiki/Formatting_codes
+
+# All message must be inside single quotes '
+
+# RTD chooses a random number 0 - 50(by default). You can change the highest number here.
+# The lower the number, the better the odds. You get the idea(I hope).
+MaxNumber: 50
+
+# This is the amount of money it cost's to roll the dice!
+rtdCost: 50
+
+# This is the message to display if the user doesnt have enough money.
+#noMoney: disable <-- to disable
+noMoney: '&6You don''t have enough money to play!'
+
+# This is the winning number.
+WinningNumber: 18
+
+# Message sent to player if he/she wins.
+#WinnerMSG: disable <-- to disable
+WinnerMSG: '&3You''ve just won $100!'
+
+# Message sent to player if he/she loses.
+#LoserMSG: disable <-- to disable
+LoserMSG: '&2Not a winner this time! Try again?'
+
+# This is how much money the player wins.
+WinAmount: 100
+
+# This is the message that is broadcasted to the server if someone wins.
+# <player> - inserts players name
+# BroadcastMSG: disable <-- to disable
+BroadcastMSG: '&3<player> has won $100. You can too! type "/rtd help" for more info!'

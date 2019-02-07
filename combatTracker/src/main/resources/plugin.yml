@@ -1,0 +1,10 @@
+name: combatTracker
+main: com.gmail.dejayyy.Main
+description: 'Put players in combat and not allow the use of commands.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  combatTracker:
+    aliases: ct
+    usage: /<command>

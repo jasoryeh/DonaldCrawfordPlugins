@@ -1,0 +1,20 @@
+name: Random Teleport
+main: com.gmail.dejayyy.randomTP.rtpMain
+description: Teleport to a random location in the map with 1 simple command!
+version: 1.1
+author: ImDeJay
+
+commands:
+  randomtpreload:
+  
+  tprandom:
+  
+  randomtp:
+  
+  wild:
+  
+  addwildlocation:
+    aliases: [addwildloc, awl]
+    
+  addrandomlocation:
+    aliases: [addrandloc, arl]

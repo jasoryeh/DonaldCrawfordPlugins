@@ -1,0 +1,9 @@
+name: commandSpy
+main: com.gmail.dejayyy.commandSpy.csMain
+description: 'View commands sent by players.'
+version: 1.0
+author: ImDeJay
+
+commands:
+  commandspy:
+    aliases: cspy
