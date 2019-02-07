@@ -1,5 +1,5 @@
 name: killMobs
-main: dejay.killMobs
+main: com.gmail.dejayyy.killMobs
 description: Remove mobs from the server.
 version: 1.1
 author: ImDeJay

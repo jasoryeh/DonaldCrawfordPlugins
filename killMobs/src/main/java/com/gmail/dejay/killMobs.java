@@ -1,4 +1,4 @@
-package dejay;
+package com.gmail.dejayyy;
 
 import java.util.List;
 import java.util.logging.Logger;

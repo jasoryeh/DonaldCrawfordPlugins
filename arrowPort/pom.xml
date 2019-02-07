@@ -37,5 +37,10 @@
             <artifactId>spigot-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.gmail.dejayyy</groupId>
+            <artifactId>combatTracker</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

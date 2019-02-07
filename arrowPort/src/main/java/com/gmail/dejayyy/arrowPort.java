@@ -25,6 +25,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.projectiles.ProjectileSource;
 
 public class arrowPort extends JavaPlugin implements Listener{
 	
@@ -117,9 +118,9 @@ public class arrowPort extends JavaPlugin implements Listener{
 			if(this.getConfig().getBoolean("DisableInCombat")){
 				
 				if(ctPlugin){
-					
+
 					ctAPI api = ctAPI.getAPI();
-					
+
 					if(api.isInCombat(player)){
 						
 						String msg = this.getConfig().getString("DisabledMessage");
@@ -279,7 +280,7 @@ public class arrowPort extends JavaPlugin implements Listener{
         if(event.getEntity() instanceof Arrow) {
         	
             Arrow arrow = (Arrow)event.getEntity();
-            Entity shooter = arrow.getShooter();
+            ProjectileSource shooter = arrow.getShooter();
 
             if(shooter instanceof Player) {
             	
@@ -450,7 +451,7 @@ public class arrowPort extends JavaPlugin implements Listener{
 		
 		static String replaceColors(String message)
 		  {
-		    return message.replaceAll("(?i)&([a-f0-9])", "§$1");
+		    return message.replaceAll("(?i)&([a-f0-9])", "ï¿½$1");
 		  }
 		
 		
