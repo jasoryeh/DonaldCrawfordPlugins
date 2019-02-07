@@ -483,6 +483,5 @@ public class mcStats {
         return URLEncoder.encode(text, "UTF-8");
     }
 
-    
-	
+
 }

@@ -11,7 +11,7 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * Connects to and uses a SQLite database
- * 
+ *
  * @author tips48
  */
 public class SQLite extends Database {
@@ -21,11 +21,9 @@ public class SQLite extends Database {
 
     /**
      * Creates a new SQLite instance
-     * 
-     * @param plugin
-     *            Plugin instance
-     * @param dbLocation
-     *            Location of the Database (Must end in .db)
+     *
+     * @param plugin     Plugin instance
+     * @param dbLocation Location of the Database (Must end in .db)
      */
     public SQLite(Plugin plugin, String dbLocation) {
         super(plugin);
@@ -45,7 +43,7 @@ public class SQLite extends Database {
         }
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().getPath().toString() + "/" + dbLocation);     
+            connection = DriverManager.getConnection("jdbc:sqlite:" + plugin.getDataFolder().getPath().toString() + "/" + dbLocation);
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Could not connect to SQLite server! because: " + e.getMessage());
         } catch (ClassNotFoundException e) {

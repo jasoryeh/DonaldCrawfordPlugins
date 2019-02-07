@@ -7,18 +7,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class MySQL {
-	
-    private String       hostname   = "";
-    private String       portnmbr   = "";
-    private String       username   = "";
-    private String       password   = "";
-    private String       database   = "";
-    protected boolean    connected  = false;
+
+    private String hostname = "";
+    private String portnmbr = "";
+    private String username = "";
+    private String password = "";
+    private String database = "";
+    protected boolean connected = false;
     protected Connection connection = null;
 
     public MySQL(final String hostname, final String portnmbr, final String database, final String username, final String password) {
         super();
-        
+
         this.hostname = hostname;
         this.portnmbr = portnmbr;
         this.database = database;
@@ -28,10 +28,10 @@ public class MySQL {
 
     /**
      * checks if the connection is still active
-     * 
+     *
      * @return true if still active
      * @throws SQLException
-     * */
+     */
     public boolean checkConnection() throws SQLException {
         if (connection.isValid(5)) return true;
         return false;
@@ -39,12 +39,10 @@ public class MySQL {
 
     /**
      * Empties a table
-     * 
-     * @param table
-     *            the table to empty
+     *
+     * @param table the table to empty
      * @return true if data-removal was successful.
-     * 
-     * */
+     */
     public boolean clearTable(final String table) {
         Statement statement = null;
         String query = null;
@@ -60,7 +58,7 @@ public class MySQL {
 
     /**
      * close database connection
-     * */
+     */
     public void close() {
         try {
             if (connection != null) {
@@ -73,11 +71,10 @@ public class MySQL {
 
     /**
      * Delete a table
-     * 
-     * @param table
-     *            the table to delete
+     *
+     * @param table the table to delete
      * @return true if deletion was successful.
-     * */
+     */
     public boolean deleteTable(final String table) {
         Statement statement = null;
         try {
@@ -92,10 +89,9 @@ public class MySQL {
 
     /**
      * returns the active connection
-     * 
+     *
      * @return Connection
-     * 
-     * */
+     */
 
     public Connection getConnection() {
         try {
@@ -108,16 +104,12 @@ public class MySQL {
 
     /**
      * Insert data into a table
-     * 
-     * @param table
-     *            the table to insert data
-     * @param column
-     *            a String[] of the columns to insert to
-     * @param value
-     *            a String[] of the values to insert into the column (value[0] goes in column[0])
-     * 
+     *
+     * @param table  the table to insert data
+     * @param column a String[] of the columns to insert to
+     * @param value  a String[] of the values to insert into the column (value[0] goes in column[0])
      * @return true if insertion was successful.
-     * */
+     */
     public boolean insert(final String table, final String[] column, final String[] value) {
         Statement statement = null;
         final StringBuilder sb1 = new StringBuilder();
@@ -142,8 +134,7 @@ public class MySQL {
 
     /**
      * open database connection
-     * 
-     * */
+     */
     public Connection open() {
         String url = "";
         try {
@@ -161,13 +152,11 @@ public class MySQL {
 
     /**
      * Query the database
-     * 
-     * @param query
-     *            the database query
+     *
+     * @param query the database query
      * @return ResultSet of the query
-     * 
      * @throws SQLException
-     * */
+     */
     public ResultSet query(final String query) throws SQLException {
         Statement statement = null;
         ResultSet result = null;

@@ -11,9 +11,10 @@ import org.bukkit.plugin.Plugin;
 
 import com.gmail.dejayyy.killStats.ksMain;
 import com.gmail.dejayyy.killStats.API.ksAPI;
+
 /**
  * Connects to and uses a MySQL database
- * 
+ *
  * @author -_Husky_-
  * @author tips48
  */
@@ -26,24 +27,17 @@ public class MySQL extends Database {
 
     private Connection connection;
     public static ksMain main;
-    
-    
-    
+
+
     /**
      * Creates a new MySQL instance
-     * 
-     * @param plugin
-     *            Plugin instance
-     * @param hostname
-     *            Name of the host
-     * @param port
-     *            Port number
-     * @param database
-     *            Database name
-     * @param username
-     *            Username
-     * @param password
-     *            Password
+     *
+     * @param plugin   Plugin instance
+     * @param hostname Name of the host
+     * @param port     Port number
+     * @param database Database name
+     * @param username Username
+     * @param password Password
      */
     public MySQL(Plugin plugin, String hostname, String port, String database, String username, String password) {
         super(plugin);
@@ -52,29 +46,29 @@ public class MySQL extends Database {
         this.database = database;
         this.user = username;
         this.password = password;
-        this.connection = null;         
-        
+        this.connection = null;
+
     }
 
     @Override
     public Connection openConnection() {
-    	
+
         try {
-        	
+
             Class.forName("com.mysql.jdbc.Driver");
-            
+
             connection = DriverManager.getConnection("jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.user, this.password);
-        
+
         } catch (SQLException e) {
 
             plugin.getLogger().info("Couldnt connect to MySQL: " + e.getMessage());
 
         } catch (ClassNotFoundException e) {
-        	
+
             plugin.getLogger().info("Couldnt connect to MySQL: " + e.getMessage());
 
         }
-        
+
         return connection;
     }
 

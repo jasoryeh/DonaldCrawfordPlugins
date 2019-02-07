@@ -57,1573 +57,1573 @@ import com.gmail.dejayyy.killStats.langHandler.Lang;
 
 @SuppressWarnings("deprecation")
 public class Main extends JavaPlugin implements Listener {
-	// TODO: add /ks reset all
-	// TODO: re-do permissions, for better handling of admin commands/abuse
-	// TODO: option to leave scoreboard on
-	// TODO: option to change how long anti boost last's
+    // TODO: add /ks reset all
+    // TODO: re-do permissions, for better handling of admin commands/abuse
+    // TODO: option to leave scoreboard on
+    // TODO: option to change how long anti boost last's
 
-	public List<String> myTop5 = new ArrayList<String>();
-	public File configFile;
-	public FileConfiguration playersFile;
-	public File cFile;
-	public FileConfiguration langFile;
-	public static Logger log;
-	public static YamlConfiguration LANG;
-	public static File LANG_FILE;
-	public List<String> deadList = new ArrayList<String>();
-	public HashSet<String> reset = new HashSet<String>();
-	boolean logActions;
-	public int taskID;
-	public Main plugin;
-	public boolean useDB;
-	public static ksAPI API;
+    public List<String> myTop5 = new ArrayList<String>();
+    public File configFile;
+    public FileConfiguration playersFile;
+    public File cFile;
+    public FileConfiguration langFile;
+    public static Logger log;
+    public static YamlConfiguration LANG;
+    public static File LANG_FILE;
+    public List<String> deadList = new ArrayList<String>();
+    public HashSet<String> reset = new HashSet<String>();
+    boolean logActions;
+    public int taskID;
+    public Main plugin;
+    public boolean useDB;
+    public static ksAPI API;
 
-	public List<String> disabledWorlds = new ArrayList<String>();
+    public List<String> disabledWorlds = new ArrayList<String>();
 
-	Connection connection = null;
+    Connection connection = null;
 
-	static MySQL sql;
+    static MySQL sql;
 
-	public void onEnable() {
+    public void onEnable() {
 
-		this.loadLang();
+        this.loadLang();
 
-		log = getServer().getLogger();
+        log = getServer().getLogger();
 
-		getServer().getPluginManager().registerEvents(this, this);
+        getServer().getPluginManager().registerEvents(this, this);
 
-		API = new ksAPI(this);
+        API = new ksAPI(this);
 
-		this.loadPlayerYML();
+        this.loadPlayerYML();
 
-		this.saveDefaultConfig();
+        this.saveDefaultConfig();
 
-		this.saveResource("OriginalConfig.txt", true);
+        this.saveResource("OriginalConfig.txt", true);
 
-		logActions = this.getConfig().getBoolean("LogActions");
+        logActions = this.getConfig().getBoolean("LogActions");
 
-		for (String x : this.getConfig().getStringList("IgnoredWorlds")) {
+        for (String x : this.getConfig().getStringList("IgnoredWorlds")) {
 
-			disabledWorlds.add(x.toLowerCase());
+            disabledWorlds.add(x.toLowerCase());
 
-		}
+        }
 
-		this.startMetrics();
+        this.startMetrics();
 
-	}
+    }
 
-	public void startMetrics() {
+    public void startMetrics() {
 
-		try {
-			mcStats metrics = new mcStats(this);
-			metrics.start();
+        try {
+            mcStats metrics = new mcStats(this);
+            metrics.start();
 
-		} catch (IOException e) {
+        } catch (IOException e) {
 
-			// Failed to submit the stats :-(
+            // Failed to submit the stats :-(
 
-		}
+        }
 
-	}
+    }
 
-	public void onDisable() {
+    public void onDisable() {
 
-		this.savePlayerYML();
+        this.savePlayerYML();
 
-	}
+    }
 
-	@EventHandler
-	public void playerLogin(PlayerJoinEvent event) {
+    @EventHandler
+    public void playerLogin(PlayerJoinEvent event) {
 
-		Player player = event.getPlayer();
+        Player player = event.getPlayer();
 
-		if (player.hasPermission("killstats.admin")) {
+        if (player.hasPermission("killstats.admin")) {
 
-			if (this.getConfig().getDouble("configversion") < 2.6) {
+            if (this.getConfig().getDouble("configversion") < 2.6) {
 
-				player.sendMessage(ChatColor.AQUA
-						+ Lang.ConfigOutOfDate.toString());
-				player.sendMessage(ChatColor.AQUA
-						+ Lang.ViewOriginalConfig.toString());
+                player.sendMessage(ChatColor.AQUA
+                        + Lang.ConfigOutOfDate.toString());
+                player.sendMessage(ChatColor.AQUA
+                        + Lang.ViewOriginalConfig.toString());
 
-			}
-		}
+            }
+        }
 
-	}
+    }
 
-	@EventHandler
-	public void playerDeath(PlayerDeathEvent event) throws SQLException {
+    @EventHandler
+    public void playerDeath(PlayerDeathEvent event) throws SQLException {
 
-		if (this.getConfig().getBoolean("OnlyPvPDeaths")) {
+        if (this.getConfig().getBoolean("OnlyPvPDeaths")) {
 
-			if (!(event.getEntity().getKiller() instanceof Player)) {
+            if (!(event.getEntity().getKiller() instanceof Player)) {
 
-				return;
+                return;
 
-			}
-		}
+            }
+        }
 
-		if (worldDisabled(event.getEntity().getWorld())) {
+        if (worldDisabled(event.getEntity().getWorld())) {
 
-			return;
+            return;
 
-		}
+        }
 
-		boolean antiBoost = this.getConfig().getBoolean("AntiBoostEnabled");
+        boolean antiBoost = this.getConfig().getBoolean("AntiBoostEnabled");
 
-		if (event.getEntity().getKiller() instanceof Player) {
+        if (event.getEntity().getKiller() instanceof Player) {
 
-			final Player player = event.getEntity();
-			final Player killer = player.getKiller();
+            final Player player = event.getEntity();
+            final Player killer = player.getKiller();
 
-			final String pWorld = player.getWorld().getName();
-			final String kWorld = killer.getWorld().getName();
+            final String pWorld = player.getWorld().getName();
+            final String kWorld = killer.getWorld().getName();
 
-			if (!(API.hasProfile(player.getName(), player.getWorld().getName()))) {
+            if (!(API.hasProfile(player.getName(), player.getWorld().getName()))) {
 
-				API.setupProfile(player.getName(), player.getWorld().getName());
+                API.setupProfile(player.getName(), player.getWorld().getName());
 
-			}
+            }
 
-			if (!(API.hasProfile(killer.getName(), killer.getWorld().getName()))) {
+            if (!(API.hasProfile(killer.getName(), killer.getWorld().getName()))) {
 
-				API.setupProfile(killer.getName(), killer.getWorld().getName());
+                API.setupProfile(killer.getName(), killer.getWorld().getName());
 
-			}
+            }
 
-			boolean dropHeads = this.getConfig().getBoolean("DropHead");
+            boolean dropHeads = this.getConfig().getBoolean("DropHead");
 
-			int playerDeath = API.getDeaths(player.getName(), pWorld);
-			int killerKills = API.getKills(killer.getName(), kWorld);
-			int playerStreak = API.getStreak(player.getName(), pWorld);
-			int killerStreak = API.getStreak(killer.getName(), kWorld);
+            int playerDeath = API.getDeaths(player.getName(), pWorld);
+            int killerKills = API.getKills(killer.getName(), kWorld);
+            int playerStreak = API.getStreak(player.getName(), pWorld);
+            int killerStreak = API.getStreak(killer.getName(), kWorld);
 
-			if (antiBoost) {
+            if (antiBoost) {
 
-				if (isBoosting(killer, player)) {
+                if (isBoosting(killer, player)) {
 
-					String bAlert = this.getConfig().getString("BoosterAlert");
+                    String bAlert = this.getConfig().getString("BoosterAlert");
 
-					bAlert = bAlert.replaceAll("<player>", player.getName());
+                    bAlert = bAlert.replaceAll("<player>", player.getName());
 
-					if (!(bAlert.equalsIgnoreCase("disable"))) {
+                    if (!(bAlert.equalsIgnoreCase("disable"))) {
 
-						killer.sendMessage(replaceColors(bAlert));
+                        killer.sendMessage(replaceColors(bAlert));
 
-					}
+                    }
 
-					return;
+                    return;
 
-				}
+                }
 
-				deadList.add(killer.getName() + ":" + player.getName());
+                deadList.add(killer.getName() + ":" + player.getName());
 
-				long coolDown = this.getConfig().getLong("TimeLimit");
+                long coolDown = this.getConfig().getLong("TimeLimit");
 
-				coolDown = (coolDown * 60 * 20);
+                coolDown = (coolDown * 60 * 20);
 
-				this.getServer().getScheduler()
-						.scheduleSyncDelayedTask(this, new Runnable() {
-							@Override
-							public void run() {
+                this.getServer().getScheduler()
+                        .scheduleSyncDelayedTask(this, new Runnable() {
+                            @Override
+                            public void run() {
 
-								deadList.remove(killer.getName() + ":"
-										+ player.getName());
+                                deadList.remove(killer.getName() + ":"
+                                        + player.getName());
 
-							}
+                            }
 
-						}, coolDown);
+                        }, coolDown);
 
-			}
+            }
 
-			if (dropHeads == true) {
+            if (dropHeads == true) {
 
-				this.DropHead(player);
-			}
+                this.DropHead(player);
+            }
 
-			if (playerStreak > 0) {
+            if (playerStreak > 0) {
 
-				if (this.getConfig().getBoolean("BroadcastBrokenStreak") == true) {
+                if (this.getConfig().getBoolean("BroadcastBrokenStreak") == true) {
 
-					this.HandleBrokenStreak(player, killer, playerStreak);
+                    this.HandleBrokenStreak(player, killer, playerStreak);
 
-				}
+                }
 
-				API.setStreak(player.getName(), 0, pWorld);
+                API.setStreak(player.getName(), 0, pWorld);
 
-			} // playerstreak > 0
+            } // playerstreak > 0
 
-			killerStreak++;
-			playerDeath++;
-			killerKills++;
+            killerStreak++;
+            playerDeath++;
+            killerKills++;
 
-			API.setStreak(killer.getName(), killerStreak, kWorld);
-			API.setDeaths(player.getName(), playerDeath, pWorld);
-			API.setKills(killer.getName(), killerKills, kWorld);
+            API.setStreak(killer.getName(), killerStreak, kWorld);
+            API.setDeaths(player.getName(), playerDeath, pWorld);
+            API.setKills(killer.getName(), killerKills, kWorld);
 
-			if (this.getConfig().getBoolean("RewardsEnabled") == true) {
+            if (this.getConfig().getBoolean("RewardsEnabled") == true) {
 
-				this.HandleRewards(killer, player, killerStreak);
+                this.HandleRewards(killer, player, killerStreak);
 
-			}
+            }
 
-			if (this.getConfig().getBoolean("broadcastStreak") == true) {
+            if (this.getConfig().getBoolean("broadcastStreak") == true) {
 
-				this.HandleBroadcast(player, killer, killerStreak);
+                this.HandleBroadcast(player, killer, killerStreak);
 
-			}
+            }
 
-			this.savePlayerYML();
+            this.savePlayerYML();
 
-		} else {
+        } else {
 
-			Player player = event.getEntity();
+            Player player = event.getEntity();
 
-			if (!(API.hasProfile(player.getName(), player.getWorld().getName()))) {
+            if (!(API.hasProfile(player.getName(), player.getWorld().getName()))) {
 
-				API.setupProfile(player.getName(), player.getWorld().getName());
+                API.setupProfile(player.getName(), player.getWorld().getName());
 
-			}
+            }
 
-			final String pWorld = player.getWorld().getName();
+            final String pWorld = player.getWorld().getName();
 
-			int playerDeath = API.getDeaths(player.getName(), pWorld);
+            int playerDeath = API.getDeaths(player.getName(), pWorld);
 
-			playerDeath++;
+            playerDeath++;
 
-			API.setDeaths(player.getName(), playerDeath, pWorld);
-			API.setStreak(player.getName(), 0, pWorld);
+            API.setDeaths(player.getName(), playerDeath, pWorld);
+            API.setStreak(player.getName(), 0, pWorld);
 
-			return;
+            return;
 
-		}
+        }
 
-	}
+    }
 
-	public boolean onCommand(CommandSender sender, Command cmd, String cmdL,
-			String[] args) {
+    public boolean onCommand(CommandSender sender, Command cmd, String cmdL,
+                             String[] args) {
 
-		if (!(sender instanceof Player)) {
+        if (!(sender instanceof Player)) {
 
-			sender.sendMessage(Lang.CannotRunFromConsole.toString());
+            sender.sendMessage(Lang.CannotRunFromConsole.toString());
 
-			return true;
+            return true;
 
-		}
+        }
 
-		final Player player = (Player) sender;
+        final Player player = (Player) sender;
 
-		if (cmdL.equalsIgnoreCase("killStats") || cmdL.equalsIgnoreCase("ks")) {
+        if (cmdL.equalsIgnoreCase("killStats") || cmdL.equalsIgnoreCase("ks")) {
 
-			if (this.worldDisabled(player.getWorld())) {
+            if (this.worldDisabled(player.getWorld())) {
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + Lang.NoStatsToDisplay.toString());
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + Lang.NoStatsToDisplay.toString());
 
-				return true;
+                return true;
 
-			}
+            }
 
-			if (args.length > 2) {
+            if (args.length > 2) {
 
-				this.pluginHelp(player);
+                this.pluginHelp(player);
 
-				return true;
+                return true;
 
-			}
+            }
 
-			if (args.length == 0) {
+            if (args.length == 0) {
 
-				this.getPlayerInfo(player, player);
+                this.getPlayerInfo(player, player);
 
-				return true;
-			}
+                return true;
+            }
 
-			if (args.length == 1) {
+            if (args.length == 1) {
 
-				if (args[0].equalsIgnoreCase("?")) {
+                if (args[0].equalsIgnoreCase("?")) {
 
-					this.pluginHelp(player);
+                    this.pluginHelp(player);
 
-					player.sendMessage(ChatColor.DARK_AQUA + "Plugin Author: "
-							+ ChatColor.AQUA + "ImDeJay");
+                    player.sendMessage(ChatColor.DARK_AQUA + "Plugin Author: "
+                            + ChatColor.AQUA + "ImDeJay");
 
-					return true;
+                    return true;
 
-				} else if (args[0].equalsIgnoreCase("top")) {
+                } else if (args[0].equalsIgnoreCase("top")) {
 
-					// player.sendMessage(ChatColor.DARK_AQUA + "[Rank]" +
-					// ChatColor.AQUA + " [Playername]" + ChatColor.DARK_AQUA +
-					// " - " + ChatColor.AQUA + "[Kills : Deaths]");
-					String dfault = this.getConfig()
-							.getString("DefaultTopType");
+                    // player.sendMessage(ChatColor.DARK_AQUA + "[Rank]" +
+                    // ChatColor.AQUA + " [Playername]" + ChatColor.DARK_AQUA +
+                    // " - " + ChatColor.AQUA + "[Kills : Deaths]");
+                    String dfault = this.getConfig()
+                            .getString("DefaultTopType");
 
-					if (dfault.equalsIgnoreCase("kills")
-							|| dfault.equalsIgnoreCase("deaths")
-							|| dfault.equalsIgnoreCase("streak")
-							|| dfault.equalsIgnoreCase("ratio")) {
+                    if (dfault.equalsIgnoreCase("kills")
+                            || dfault.equalsIgnoreCase("deaths")
+                            || dfault.equalsIgnoreCase("streak")
+                            || dfault.equalsIgnoreCase("ratio")) {
 
-						this.getRank(player, dfault);
+                        this.getRank(player, dfault);
 
-						return true;
+                        return true;
 
-					} else {
+                    } else {
 
-						this.getRank(player, "kills");
+                        this.getRank(player, "kills");
 
-						return true;
+                        return true;
 
-					}
+                    }
 
-				} else if (args[0].equalsIgnoreCase("startover")) {
+                } else if (args[0].equalsIgnoreCase("startover")) {
 
-					player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-							+ ChatColor.AQUA + Lang.AboutToReset.toString());
-					player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-							+ ChatColor.AQUA + Lang.AreYouSure.toString());
-					player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-							+ ChatColor.AQUA + Lang.AnswerWithYesNo.toString());
+                    player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                            + ChatColor.AQUA + Lang.AboutToReset.toString());
+                    player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                            + ChatColor.AQUA + Lang.AreYouSure.toString());
+                    player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                            + ChatColor.AQUA + Lang.AnswerWithYesNo.toString());
 
-					reset.add(player.getName());
+                    reset.add(player.getName());
 
-					int cD = 15 * 20;
+                    int cD = 15 * 20;
 
-					taskID = this.getServer().getScheduler()
-							.scheduleSyncDelayedTask(this, new Runnable() {
-								@Override
-								public void run() {
+                    taskID = this.getServer().getScheduler()
+                            .scheduleSyncDelayedTask(this, new Runnable() {
+                                @Override
+                                public void run() {
 
-									reset.remove(player.getName());
-									player.sendMessage(ChatColor.DARK_AQUA
-											+ "[killStats] " + ChatColor.AQUA
-											+ Lang.RequestTimedOut.toString());
+                                    reset.remove(player.getName());
+                                    player.sendMessage(ChatColor.DARK_AQUA
+                                            + "[killStats] " + ChatColor.AQUA
+                                            + Lang.RequestTimedOut.toString());
 
-								}
+                                }
 
-							}, cD);
+                            }, cD);
 
-					return true;
+                    return true;
 
-				} else if (args[0].equalsIgnoreCase("reload")) {
+                } else if (args[0].equalsIgnoreCase("reload")) {
 
-					if (player.hasPermission("killStats.admin")) {
+                    if (player.hasPermission("killStats.admin")) {
 
-						this.loadPlayerYML();
+                        this.loadPlayerYML();
 
-						this.loadLang();
+                        this.loadLang();
 
-						disabledWorlds.clear();
+                        disabledWorlds.clear();
 
-						this.reloadConfig();
+                        this.reloadConfig();
 
-						for (String x : this.getConfig().getStringList(
-								"IgnoredWorlds")) {
+                        for (String x : this.getConfig().getStringList(
+                                "IgnoredWorlds")) {
 
-							disabledWorlds.add(x.toLowerCase());
+                            disabledWorlds.add(x.toLowerCase());
 
-						}
+                        }
 
-						player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-								+ ChatColor.AQUA
-								+ Lang.ReloadComplte.toString());
+                        player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                                + ChatColor.AQUA
+                                + Lang.ReloadComplte.toString());
 
-						if (this.logActions) {
+                        if (this.logActions) {
 
-							this.logInfo(player.getName(),
-									"Reloaded Configuration.");
+                            this.logInfo(player.getName(),
+                                    "Reloaded Configuration.");
 
-						}
+                        }
 
-						return true;
+                        return true;
 
-					} else {
+                    } else {
 
-						player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-								+ ChatColor.AQUA + Lang.NoPermission.toString());
+                        player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                                + ChatColor.AQUA + Lang.NoPermission.toString());
 
-						return true;
+                        return true;
 
-					}
+                    }
 
-				}
+                }
 
-				Player tPlayer = player.getServer().getPlayer(args[0]);
+                Player tPlayer = player.getServer().getPlayer(args[0]);
 
-				if (!(tPlayer == null)) {
+                if (!(tPlayer == null)) {
 
-					this.getPlayerInfo(player, tPlayer);
+                    this.getPlayerInfo(player, tPlayer);
 
-					return true;
+                    return true;
 
-				} else {
+                } else {
 
-					player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-							+ ChatColor.AQUA + Lang.PlayerNotFound.toString());
+                    player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                            + ChatColor.AQUA + Lang.PlayerNotFound.toString());
 
-					return true;
+                    return true;
 
-				} // args = profile
+                } // args = profile
 
-			} else if (args.length == 2) {
+            } else if (args.length == 2) {
 
-				if (args[0].equalsIgnoreCase("head")) {
+                if (args[0].equalsIgnoreCase("head")) {
 
-					if (!(player.hasPermission("killstats.admin"))) {
+                    if (!(player.hasPermission("killstats.admin"))) {
 
-						player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-								+ ChatColor.AQUA + Lang.NoPermission.toString());
+                        player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                                + ChatColor.AQUA + Lang.NoPermission.toString());
 
-						return true;
+                        return true;
 
-					}
+                    }
 
-					Player tPlayer = this.getServer().getPlayer(args[1]);
+                    Player tPlayer = this.getServer().getPlayer(args[1]);
 
-					if (tPlayer == null) {
+                    if (tPlayer == null) {
 
-						ItemStack i = new ItemStack(Material.SKULL_ITEM, 1,
-								(short) 3);
+                        ItemStack i = new ItemStack(Material.SKULL_ITEM, 1,
+                                (short) 3);
 
-						SkullMeta meta = (SkullMeta) i.getItemMeta();
+                        SkullMeta meta = (SkullMeta) i.getItemMeta();
 
-						meta.setOwner(args[1].toString());
+                        meta.setOwner(args[1].toString());
 
-						i.setItemMeta(meta);
+                        i.setItemMeta(meta);
 
-						player.getInventory().setItemInHand(i);
+                        player.getInventory().setItemInHand(i);
 
-					} else {
+                    } else {
 
-						ItemStack i = new ItemStack(Material.SKULL_ITEM, 1,
-								(short) 3);
+                        ItemStack i = new ItemStack(Material.SKULL_ITEM, 1,
+                                (short) 3);
 
-						SkullMeta meta = (SkullMeta) i.getItemMeta();
+                        SkullMeta meta = (SkullMeta) i.getItemMeta();
 
-						meta.setOwner(tPlayer.getName());
+                        meta.setOwner(tPlayer.getName());
 
-						i.setItemMeta(meta);
+                        i.setItemMeta(meta);
 
-						player.getInventory().setItemInHand(i);
+                        player.getInventory().setItemInHand(i);
 
-					}
+                    }
 
-				} else if (args[0].equalsIgnoreCase("prune")) {
+                } else if (args[0].equalsIgnoreCase("prune")) {
 
-					if (args[1].equalsIgnoreCase("kills")) {
+                    if (args[1].equalsIgnoreCase("kills")) {
 
-						this.prunePlayers(player, "kills");
+                        this.prunePlayers(player, "kills");
 
-						return true;
+                        return true;
 
-					} else if (args[1].equalsIgnoreCase("deaths")) {
+                    } else if (args[1].equalsIgnoreCase("deaths")) {
 
-						this.prunePlayers(player, "deaths");
+                        this.prunePlayers(player, "deaths");
 
-						return true;
+                        return true;
 
-					} else if (args[1].equalsIgnoreCase("inactive")) {
+                    } else if (args[1].equalsIgnoreCase("inactive")) {
 
-						this.prunePlayers(player, "inactive");
+                        this.prunePlayers(player, "inactive");
 
-						return true;
+                        return true;
 
-					} // args == kills/deaths
+                    } // args == kills/deaths
 
-				} else if (args[0].equalsIgnoreCase("top")) {
+                } else if (args[0].equalsIgnoreCase("top")) {
 
-					String type = args[1].toString();
+                    String type = args[1].toString();
 
-					if (type.equalsIgnoreCase("ratio")) {
+                    if (type.equalsIgnoreCase("ratio")) {
 
-						this.getRank(player, "ratio");
+                        this.getRank(player, "ratio");
 
-					} else if (type.equalsIgnoreCase("kills")) {
+                    } else if (type.equalsIgnoreCase("kills")) {
 
-						this.getRank(player, "kills");
+                        this.getRank(player, "kills");
 
-					} else if (type.equalsIgnoreCase("deaths")) {
+                    } else if (type.equalsIgnoreCase("deaths")) {
 
-						this.getRank(player, "deaths");
+                        this.getRank(player, "deaths");
 
-					} else if (type.equalsIgnoreCase("streak")) {
+                    } else if (type.equalsIgnoreCase("streak")) {
 
-						this.getRank(player, "streak");
+                        this.getRank(player, "streak");
 
-					}
+                    }
 
-				} else if (args[0].equalsIgnoreCase("reset")) {
+                } else if (args[0].equalsIgnoreCase("reset")) {
 
-					Player targetPlayer = (Player) this.getServer().getPlayer(
-							args[1]);
+                    Player targetPlayer = (Player) this.getServer().getPlayer(
+                            args[1]);
 
-					if (player.hasPermission("killStats.admin")) {
+                    if (player.hasPermission("killStats.admin")) {
 
-						if (targetPlayer == null) {
+                        if (targetPlayer == null) {
 
-							OfflinePlayer offlinePlayer = this.getServer()
-									.getOfflinePlayer(args[0]);
+                            OfflinePlayer offlinePlayer = this.getServer()
+                                    .getOfflinePlayer(args[0]);
 
-							API.setKills(offlinePlayer.getName(), 0, player
-									.getWorld().getName());
-							API.setDeaths(offlinePlayer.getName(), 0, player
-									.getWorld().getName());
-							API.setStreak(offlinePlayer.getName(), 0, player
-									.getWorld().getName());
+                            API.setKills(offlinePlayer.getName(), 0, player
+                                    .getWorld().getName());
+                            API.setDeaths(offlinePlayer.getName(), 0, player
+                                    .getWorld().getName());
+                            API.setStreak(offlinePlayer.getName(), 0, player
+                                    .getWorld().getName());
 
-							player.sendMessage(ChatColor.DARK_AQUA
-									+ "[killStats] " + ChatColor.AQUA
-									+ Lang.ResetSuccess.toString());
+                            player.sendMessage(ChatColor.DARK_AQUA
+                                    + "[killStats] " + ChatColor.AQUA
+                                    + Lang.ResetSuccess.toString());
 
-							return true;
+                            return true;
 
-						}
+                        }
 
-						API.setKills(targetPlayer.getName(), 0, targetPlayer
-								.getWorld().getName());
-						API.setDeaths(targetPlayer.getName(), 0, targetPlayer
-								.getWorld().getName());
-						API.setStreak(targetPlayer.getName(), 0, targetPlayer
-								.getWorld().getName());
+                        API.setKills(targetPlayer.getName(), 0, targetPlayer
+                                .getWorld().getName());
+                        API.setDeaths(targetPlayer.getName(), 0, targetPlayer
+                                .getWorld().getName());
+                        API.setStreak(targetPlayer.getName(), 0, targetPlayer
+                                .getWorld().getName());
 
-						this.savePlayerYML();
+                        this.savePlayerYML();
 
-						player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-								+ ChatColor.AQUA
-								+ Lang.PersonalResetSuccess.toString());
+                        player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                                + ChatColor.AQUA
+                                + Lang.PersonalResetSuccess.toString());
 
-						if (this.logActions) {
+                        if (this.logActions) {
 
-							this.logInfo(player.getName(), "Reset "
-									+ targetPlayer.getName() + "'s profile.");
+                            this.logInfo(player.getName(), "Reset "
+                                    + targetPlayer.getName() + "'s profile.");
 
-						}
+                        }
 
-						return true;
+                        return true;
 
-					} else {
+                    } else {
 
-						player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-								+ ChatColor.AQUA + Lang.NoPermission.toString());
+                        player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                                + ChatColor.AQUA + Lang.NoPermission.toString());
 
-					}
+                    }
 
-				} else {
+                } else {
 
-					this.pluginHelp(player);
+                    this.pluginHelp(player);
 
-					return true;
+                    return true;
 
-				} // args == profile
+                } // args == profile
 
-			} // args.length == 2
+            } // args.length == 2
 
-		} // cmdl ==
+        } // cmdl ==
 
-		return true;
+        return true;
 
-	} // onCommand
+    } // onCommand
 
-	@EventHandler
-	@SuppressWarnings("deprecation")
-	public void playerChat(PlayerChatEvent event) {
+    @EventHandler
+    @SuppressWarnings("deprecation")
+    public void playerChat(PlayerChatEvent event) {
 
-		Player player = event.getPlayer();
-		String msg = event.getMessage();
+        Player player = event.getPlayer();
+        String msg = event.getMessage();
 
-		if (reset.contains(player.getName())) {
+        if (reset.contains(player.getName())) {
 
-			if (msg.equalsIgnoreCase("yes") || msg.equalsIgnoreCase("y")) {
+            if (msg.equalsIgnoreCase("yes") || msg.equalsIgnoreCase("y")) {
 
-				API.setKills(player.getName(), 0, player.getWorld().getName());
-				API.setDeaths(player.getName(), 0, player.getWorld().getName());
-				API.setStreak(player.getName(), 0, player.getWorld().getName());
+                API.setKills(player.getName(), 0, player.getWorld().getName());
+                API.setDeaths(player.getName(), 0, player.getWorld().getName());
+                API.setStreak(player.getName(), 0, player.getWorld().getName());
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + Lang.PersonalResetSuccess.toString());
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + Lang.PersonalResetSuccess.toString());
 
-				reset.remove(player.getName());
+                reset.remove(player.getName());
 
-				this.getServer().getScheduler().cancelTask(taskID);
+                this.getServer().getScheduler().cancelTask(taskID);
 
-			} else if (msg.equalsIgnoreCase("no") || msg.equalsIgnoreCase("n")) {
+            } else if (msg.equalsIgnoreCase("no") || msg.equalsIgnoreCase("n")) {
 
-				reset.remove(player.getName());
+                reset.remove(player.getName());
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + Lang.RequestCancelled.toString());
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + Lang.RequestCancelled.toString());
 
-				this.getServer().getScheduler().cancelTask(taskID);
+                this.getServer().getScheduler().cancelTask(taskID);
 
-			} else {
+            } else {
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + Lang.InvalidAnswer.toString());
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + Lang.InvalidAnswer.toString());
 
-			}
+            }
 
-			event.setCancelled(true);
-		}
+            event.setCancelled(true);
+        }
 
-	}
+    }
 
-	public void loadLangYML() {
+    public void loadLangYML() {
 
-		LANG_FILE = new File(getDataFolder(), "lang.yml");
+        LANG_FILE = new File(getDataFolder(), "lang.yml");
 
-		LANG = new YamlConfiguration();
+        LANG = new YamlConfiguration();
 
-		if (getDataFolder().exists() == false) {
-			try {
-				getDataFolder().mkdir();
-			} catch (Exception ex) {
-				// something went wrong.
-			}
+        if (getDataFolder().exists() == false) {
+            try {
+                getDataFolder().mkdir();
+            } catch (Exception ex) {
+                // something went wrong.
+            }
 
-		}
+        }
 
-		if (LANG_FILE.exists() == false) {
+        if (LANG_FILE.exists() == false) {
 
-			try {
-				LANG_FILE.createNewFile();
-			} catch (Exception ex) {
-				// something went wrong.
-			}
-		}
+            try {
+                LANG_FILE.createNewFile();
+            } catch (Exception ex) {
+                // something went wrong.
+            }
+        }
 
-		try { // Load payers.yml
+        try { // Load payers.yml
 
-			Lang.setFile(LANG);
+            Lang.setFile(LANG);
 
-		} catch (Exception ex) {
+        } catch (Exception ex) {
 
-		}
-	}
+        }
+    }
 
-	public void loadPlayerYML() {
-		configFile = new File(getDataFolder(), "players.yml");
+    public void loadPlayerYML() {
+        configFile = new File(getDataFolder(), "players.yml");
 
-		playersFile = new YamlConfiguration();
+        playersFile = new YamlConfiguration();
 
-		if (getDataFolder().exists() == false) {
-			try {
-				getDataFolder().mkdir();
-			} catch (Exception ex) {
-				// something went wrong.
-			}
+        if (getDataFolder().exists() == false) {
+            try {
+                getDataFolder().mkdir();
+            } catch (Exception ex) {
+                // something went wrong.
+            }
 
-		}
+        }
 
-		if (configFile.exists() == false) {
+        if (configFile.exists() == false) {
 
-			try {
-				configFile.createNewFile();
-			} catch (Exception ex) {
-				// something went wrong.
-			}
-		}
+            try {
+                configFile.createNewFile();
+            } catch (Exception ex) {
+                // something went wrong.
+            }
+        }
 
-		try { // Load payers.yml
-			playersFile.load(configFile);
-		} catch (Exception ex) {
-			// Something went wrong
-		}
-	}
+        try { // Load payers.yml
+            playersFile.load(configFile);
+        } catch (Exception ex) {
+            // Something went wrong
+        }
+    }
 
-	public void savePlayerYML() {
+    public void savePlayerYML() {
 
-		try {
+        try {
 
-			playersFile.save(configFile);
+            playersFile.save(configFile);
 
-		} catch (IOException e) {
+        } catch (IOException e) {
 
-			e.printStackTrace();
-		}
+            e.printStackTrace();
+        }
 
-	}
+    }
 
-	static String replaceColors(String message) {
+    static String replaceColors(String message) {
 
-		return ChatColor.translateAlternateColorCodes('&', message);
+        return ChatColor.translateAlternateColorCodes('&', message);
 
-	}
+    }
 
-	public void getPlayerInfo(final Player player, Player targetPlayer) {
+    public void getPlayerInfo(final Player player, Player targetPlayer) {
 
-		if (!(API.hasProfile(targetPlayer.getName(), targetPlayer.getWorld().getName()))) {
+        if (!(API.hasProfile(targetPlayer.getName(), targetPlayer.getWorld().getName()))) {
 
-			player.sendMessage(ChatColor.DARK_AQUA + "[killStats] " + ChatColor.AQUA + Lang.NoStatsToDisplay.toString());
+            player.sendMessage(ChatColor.DARK_AQUA + "[killStats] " + ChatColor.AQUA + Lang.NoStatsToDisplay.toString());
 
-			return;
+            return;
 
-		}
+        }
 
-		double ratio;
+        double ratio;
 
-		int displayTime = this.getConfig().getInt("ScoreboardDisplayTime");
-		int lngKills = API.getKills(targetPlayer.getName(), targetPlayer.getWorld().getName());
-		int lngDeaths = API.getDeaths(targetPlayer.getName(), targetPlayer.getWorld().getName());
-		int lngKS = API.getStreak(targetPlayer.getName(), targetPlayer.getWorld().getName());
+        int displayTime = this.getConfig().getInt("ScoreboardDisplayTime");
+        int lngKills = API.getKills(targetPlayer.getName(), targetPlayer.getWorld().getName());
+        int lngDeaths = API.getDeaths(targetPlayer.getName(), targetPlayer.getWorld().getName());
+        int lngKS = API.getStreak(targetPlayer.getName(), targetPlayer.getWorld().getName());
 
-		boolean sbEnabled = this.getConfig().getBoolean("ScoreboardEnabled");
+        boolean sbEnabled = this.getConfig().getBoolean("ScoreboardEnabled");
 
-		ratio = API.getRatio(targetPlayer, targetPlayer.getWorld().getName());
+        ratio = API.getRatio(targetPlayer, targetPlayer.getWorld().getName());
 
-		ratio = Math.round(ratio * 100.0) / 100.0;
+        ratio = Math.round(ratio * 100.0) / 100.0;
 
-		if (sbEnabled) {
+        if (sbEnabled) {
 
-			displayTime = displayTime * 20;
+            displayTime = displayTime * 20;
 
-			final Scoreboard oldSB = player.getScoreboard();
+            final Scoreboard oldSB = player.getScoreboard();
 
-			ScoreboardManager manager = Bukkit.getScoreboardManager();
-			Scoreboard board = manager.getNewScoreboard();
-			Objective objective = board.registerNewObjective("ks", "dummy");
+            ScoreboardManager manager = Bukkit.getScoreboardManager();
+            Scoreboard board = manager.getNewScoreboard();
+            Objective objective = board.registerNewObjective("ks", "dummy");
 
-			objective.setDisplaySlot(DisplaySlot.SIDEBAR);
-			objective.setDisplayName(targetPlayer.getName());
+            objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+            objective.setDisplayName(targetPlayer.getName());
 
-			Score kills = objective.getScore(Bukkit.getOfflinePlayer(ChatColor.AQUA + Lang.Kills.toString() + ":"));
-			Score deaths = objective.getScore(Bukkit.getOfflinePlayer(ChatColor.AQUA + Lang.Deaths.toString() + ":"));
-			Score streak = objective.getScore(Bukkit.getOfflinePlayer(ChatColor.AQUA + Lang.Killstreak.toString() + ":"));
+            Score kills = objective.getScore(Bukkit.getOfflinePlayer(ChatColor.AQUA + Lang.Kills.toString() + ":"));
+            Score deaths = objective.getScore(Bukkit.getOfflinePlayer(ChatColor.AQUA + Lang.Deaths.toString() + ":"));
+            Score streak = objective.getScore(Bukkit.getOfflinePlayer(ChatColor.AQUA + Lang.Killstreak.toString() + ":"));
 
-			streak.setScore(lngKS);
-			kills.setScore(lngKills);
-			deaths.setScore(lngDeaths);
+            streak.setScore(lngKS);
+            kills.setScore(lngKills);
+            deaths.setScore(lngDeaths);
 
-			player.setScoreboard(board);
+            player.setScoreboard(board);
 
-			this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-						@Override
-						public void run() {
+            this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+                @Override
+                public void run() {
 
-							player.setScoreboard(oldSB);
+                    player.setScoreboard(oldSB);
 
-						}
+                }
 
-					}, displayTime);
+            }, displayTime);
 
-		} else {
+        } else {
 
-			player.sendMessage(ChatColor.DARK_AQUA + "=-=-= " + ChatColor.AQUA + targetPlayer.getName() + ChatColor.DARK_AQUA + " =-=-=");
-			player.sendMessage(ChatColor.DARK_AQUA + Lang.Kills.toString() + ": " + ChatColor.AQUA + lngKills + ChatColor.DARK_AQUA + "  " + Lang.Deaths.toString() + ": " + ChatColor.AQUA + lngDeaths);
-			player.sendMessage(ChatColor.DARK_AQUA + Lang.Killstreak.toString() + ": " + ChatColor.AQUA + lngKS + ChatColor.DARK_AQUA + "  " + Lang.Ratio.toString() + ": " + ChatColor.AQUA + ratio);
+            player.sendMessage(ChatColor.DARK_AQUA + "=-=-= " + ChatColor.AQUA + targetPlayer.getName() + ChatColor.DARK_AQUA + " =-=-=");
+            player.sendMessage(ChatColor.DARK_AQUA + Lang.Kills.toString() + ": " + ChatColor.AQUA + lngKills + ChatColor.DARK_AQUA + "  " + Lang.Deaths.toString() + ": " + ChatColor.AQUA + lngDeaths);
+            player.sendMessage(ChatColor.DARK_AQUA + Lang.Killstreak.toString() + ": " + ChatColor.AQUA + lngKS + ChatColor.DARK_AQUA + "  " + Lang.Ratio.toString() + ": " + ChatColor.AQUA + ratio);
 
-		}
-	}
+        }
+    }
 
-	public void prunePlayers(Player player, String type) {
-		// TODO: prune players from database.
-		String section = null;
+    public void prunePlayers(Player player, String type) {
+        // TODO: prune players from database.
+        String section = null;
 
-		long playerCount = 0;
+        long playerCount = 0;
 
-		if (player.hasPermission("killStats.admin")) {
+        if (player.hasPermission("killStats.admin")) {
 
-			if (type == "kills") {
+            if (type == "kills") {
 
-				if (API.seperateWorld(player.getWorld().getName())) {
+                if (API.seperateWorld(player.getWorld().getName())) {
 
-					section = "Players." + player.getWorld().getName();
+                    section = "Players." + player.getWorld().getName();
 
-				} else {
+                } else {
 
-					section = "Players";
+                    section = "Players";
 
-				}
+                }
 
-				ConfigurationSection users = this.playersFile.getConfigurationSection(section);
+                ConfigurationSection users = this.playersFile.getConfigurationSection(section);
 
-				Set<String> players = users.getKeys(false);
+                Set<String> players = users.getKeys(false);
 
-				for (String prune : players) {
+                for (String prune : players) {
 
-					int x = users.getInt(prune + ".kills");
+                    int x = users.getInt(prune + ".kills");
 
-					if (x == 0) {
+                    if (x == 0) {
 
-						users.set(prune.toString(), null);
+                        users.set(prune.toString(), null);
 
-						playerCount++;
+                        playerCount++;
 
-					} // x == 0
+                    } // x == 0
 
-				} // for loop
+                } // for loop
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + playerCount
-						+ " players were removed!");
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + playerCount
+                        + " players were removed!");
 
-				if (this.logActions) {
-					this.logInfo(player.getName(),
-							"Pruned all players based on kills.");
-				}
+                if (this.logActions) {
+                    this.logInfo(player.getName(),
+                            "Pruned all players based on kills.");
+                }
 
-			} else if (type == "deaths") {
+            } else if (type == "deaths") {
 
-				if (API.seperateWorld(player.getWorld().getName())) {
+                if (API.seperateWorld(player.getWorld().getName())) {
 
-					section = "Players." + player.getWorld().getName();
+                    section = "Players." + player.getWorld().getName();
 
-				} else {
+                } else {
 
-					section = "Players";
+                    section = "Players";
 
-				}
+                }
 
-				ConfigurationSection users = this.playersFile
-						.getConfigurationSection(section);
+                ConfigurationSection users = this.playersFile
+                        .getConfigurationSection(section);
 
-				Set<String> players = users.getKeys(false);
+                Set<String> players = users.getKeys(false);
 
-				for (String prune : players) {
+                for (String prune : players) {
 
-					int x = users.getInt(prune + ".deaths");
+                    int x = users.getInt(prune + ".deaths");
 
-					if (x == 0) {
+                    if (x == 0) {
 
-						users.set(prune.toString(), null);
+                        users.set(prune.toString(), null);
 
-						playerCount++;
+                        playerCount++;
 
-					} // x==0
+                    } // x==0
 
-				} // for loop
+                } // for loop
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + playerCount
-						+ " players were removed!");
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + playerCount
+                        + " players were removed!");
 
-			} else if (type == "inactive") {
+            } else if (type == "inactive") {
 
-				if (API.seperateWorld(player.getWorld().getName())) {
+                if (API.seperateWorld(player.getWorld().getName())) {
 
-					section = "Players." + player.getWorld().getName();
+                    section = "Players." + player.getWorld().getName();
 
-				} else {
+                } else {
 
-					section = "Players";
+                    section = "Players";
 
-				}
+                }
 
-				ConfigurationSection users = this.playersFile
-						.getConfigurationSection(section);
+                ConfigurationSection users = this.playersFile
+                        .getConfigurationSection(section);
 
-				Set<String> players = users.getKeys(false);
+                Set<String> players = users.getKeys(false);
 
-				for (String prune : players) {
+                for (String prune : players) {
 
-					int x = users.getInt(prune + ".deaths");
-					int y = users.getInt(prune + ".kills");
+                    int x = users.getInt(prune + ".deaths");
+                    int y = users.getInt(prune + ".kills");
 
-					if (x == 0 && y == 0) {
+                    if (x == 0 && y == 0) {
 
-						users.set(prune.toString(), null);
+                        users.set(prune.toString(), null);
 
-						playerCount++;
+                        playerCount++;
 
-					} // x==0
+                    } // x==0
 
-				} // for loop
+                } // for loop
 
-				player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-						+ ChatColor.AQUA + playerCount
-						+ " players were removed!");
+                player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                        + ChatColor.AQUA + playerCount
+                        + " players were removed!");
 
-			} // check type
+            } // check type
 
-			this.logInfo(player.getName(), "Pruned all inactive players.");
+            this.logInfo(player.getName(), "Pruned all inactive players.");
 
-			this.savePlayerYML();
+            this.savePlayerYML();
 
-		} else {
+        } else {
 
-			player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
-					+ ChatColor.AQUA + Lang.NoPermission.toString());
+            player.sendMessage(ChatColor.DARK_AQUA + "[killStats] "
+                    + ChatColor.AQUA + Lang.NoPermission.toString());
 
-		}
+        }
 
-	}
+    }
 
-	public void pluginHelp(Player player) {
+    public void pluginHelp(Player player) {
 
-		player.sendMessage(ChatColor.DARK_AQUA + "/killstats " + ChatColor.AQUA + Lang.CmdHelp_ViewPersonal.toString());
-		player.sendMessage(ChatColor.DARK_AQUA + "/killstats startover " + ChatColor.AQUA + Lang.CmdHelp_Reset.toString());
-		player.sendMessage(ChatColor.DARK_AQUA + "/killstats [PlayerName] " + ChatColor.AQUA + Lang.CmdHelp_ViewPlayer.toString());
-		player.sendMessage(ChatColor.DARK_AQUA + "/killstats top [kills|deaths|streak|ratio] " + ChatColor.AQUA + Lang.CmdHelp_ViewTop.toString());
-		player.sendMessage(ChatColor.DARK_AQUA + "/killstats ? " + ChatColor.AQUA + Lang.CmdHelp_PluginInfo.toString());
+        player.sendMessage(ChatColor.DARK_AQUA + "/killstats " + ChatColor.AQUA + Lang.CmdHelp_ViewPersonal.toString());
+        player.sendMessage(ChatColor.DARK_AQUA + "/killstats startover " + ChatColor.AQUA + Lang.CmdHelp_Reset.toString());
+        player.sendMessage(ChatColor.DARK_AQUA + "/killstats [PlayerName] " + ChatColor.AQUA + Lang.CmdHelp_ViewPlayer.toString());
+        player.sendMessage(ChatColor.DARK_AQUA + "/killstats top [kills|deaths|streak|ratio] " + ChatColor.AQUA + Lang.CmdHelp_ViewTop.toString());
+        player.sendMessage(ChatColor.DARK_AQUA + "/killstats ? " + ChatColor.AQUA + Lang.CmdHelp_PluginInfo.toString());
 
-		if (player.hasPermission("killstats.admin")) {
+        if (player.hasPermission("killstats.admin")) {
 
-			player.sendMessage(ChatColor.DARK_AQUA + "/killstats reload " + ChatColor.AQUA + Lang.CmdHelp_Reload.toString());
-			player.sendMessage(ChatColor.DARK_AQUA + "/killstats prune [type] " + ChatColor.AQUA + Lang.CmdHelp_Prune.toString());
-			player.sendMessage(ChatColor.DARK_AQUA + "/killstats reset [PlayerName] " + ChatColor.AQUA + Lang.CmdHelp_ResetPlayer.toString());
+            player.sendMessage(ChatColor.DARK_AQUA + "/killstats reload " + ChatColor.AQUA + Lang.CmdHelp_Reload.toString());
+            player.sendMessage(ChatColor.DARK_AQUA + "/killstats prune [type] " + ChatColor.AQUA + Lang.CmdHelp_Prune.toString());
+            player.sendMessage(ChatColor.DARK_AQUA + "/killstats reset [PlayerName] " + ChatColor.AQUA + Lang.CmdHelp_ResetPlayer.toString());
 
-		}
+        }
 
-	} // player help
+    } // player help
 
-	public void getRank(Player player, String type) {
-		// TODO: getRank using database
+    public void getRank(Player player, String type) {
+        // TODO: getRank using database
 
-		Map<String, Double> scoreMap = new HashMap<String, Double>();
-		List<String> finalScore = new ArrayList<String>();
+        Map<String, Double> scoreMap = new HashMap<String, Double>();
+        List<String> finalScore = new ArrayList<String>();
 
-		String section;
+        String section;
 
-		if (API.seperateWorld(player.getWorld().getName())) {
+        if (API.seperateWorld(player.getWorld().getName())) {
 
-			section = "Players." + player.getWorld().getName();
+            section = "Players." + player.getWorld().getName();
 
-		} else {
+        } else {
 
-			section = "Players";
+            section = "Players";
 
-		}
+        }
 
-		ConfigurationSection score = this.playersFile.getConfigurationSection(section);
+        ConfigurationSection score = this.playersFile.getConfigurationSection(section);
 
-		for (String playerName : score.getKeys(false)) {
+        for (String playerName : score.getKeys(false)) {
 
-			if (type.equalsIgnoreCase("kills")) {
+            if (type.equalsIgnoreCase("kills")) {
 
-				Double kills = score.getDouble(playerName + ".kills");
-				
-				// int deaths = score.getInt(playerName + ".deaths");
+                Double kills = score.getDouble(playerName + ".kills");
 
-				scoreMap.put(playerName, kills);
+                // int deaths = score.getInt(playerName + ".deaths");
 
-			} else if (type.equalsIgnoreCase("deaths")) {
+                scoreMap.put(playerName, kills);
 
-				Double deaths = score.getDouble(playerName + ".deaths");
+            } else if (type.equalsIgnoreCase("deaths")) {
 
-				scoreMap.put(playerName, deaths);
+                Double deaths = score.getDouble(playerName + ".deaths");
 
-			} else if (type.equalsIgnoreCase("ratio")) {
+                scoreMap.put(playerName, deaths);
 
-				Double kills = score.getDouble(playerName + ".kills");
-				Double deaths = score.getDouble(playerName + ".deaths");
+            } else if (type.equalsIgnoreCase("ratio")) {
 
-				double ratio;
+                Double kills = score.getDouble(playerName + ".kills");
+                Double deaths = score.getDouble(playerName + ".deaths");
 
-				if (kills == 0 && deaths == 0) {
+                double ratio;
 
-					ratio = 0.0;
+                if (kills == 0 && deaths == 0) {
 
-				} else if (kills > 0 && deaths == 0) {
+                    ratio = 0.0;
 
-					ratio = kills;
+                } else if (kills > 0 && deaths == 0) {
 
-				} else if (deaths > 0 && kills == 0) {
+                    ratio = kills;
 
-					ratio = -deaths;
+                } else if (deaths > 0 && kills == 0) {
 
-				} else {
+                    ratio = -deaths;
 
-					ratio = (kills / deaths);
+                } else {
 
-				}
+                    ratio = (kills / deaths);
 
-				ratio = Math.round(ratio * 100.0) / 100.0;
+                }
 
-				scoreMap.put(playerName, ratio);
+                ratio = Math.round(ratio * 100.0) / 100.0;
 
-			} else if (type.equalsIgnoreCase("streak")) {
+                scoreMap.put(playerName, ratio);
 
-				Double streak = score.getDouble(playerName + ".streak");
+            } else if (type.equalsIgnoreCase("streak")) {
 
-				scoreMap.put(playerName, streak);
-			}
+                Double streak = score.getDouble(playerName + ".streak");
 
-		}
+                scoreMap.put(playerName, streak);
+            }
 
-		for (int i = 0; i < 5; i++) {
+        }
 
-			String topName = "";
-			Double topScore = (double) 0;
+        for (int i = 0; i < 5; i++) {
 
-			for (String playerName : scoreMap.keySet()) {
+            String topName = "";
+            Double topScore = (double) 0;
 
-				Double myScore = scoreMap.get(playerName);
+            for (String playerName : scoreMap.keySet()) {
 
-				if (myScore > topScore) {
+                Double myScore = scoreMap.get(playerName);
 
-					topName = playerName;
-					topScore = myScore;
+                if (myScore > topScore) {
 
-				}
+                    topName = playerName;
+                    topScore = myScore;
 
-			}
+                }
 
-			if (!topName.equals("")) {
+            }
 
-				scoreMap.remove(topName);
+            if (!topName.equals("")) {
 
-				if (type.equalsIgnoreCase("kills")) {
+                scoreMap.remove(topName);
 
-					int kills = score.getInt(topName + ".kills");
+                if (type.equalsIgnoreCase("kills")) {
 
-					int position = i + 1;
+                    int kills = score.getInt(topName + ".kills");
 
-					String finalString = ChatColor.DARK_AQUA + "[" + position
-							+ "] " + ChatColor.AQUA + topName
-							+ ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
-							+ kills + " Killing Blows!";
+                    int position = i + 1;
 
-					finalScore.add(finalString);
+                    String finalString = ChatColor.DARK_AQUA + "[" + position
+                            + "] " + ChatColor.AQUA + topName
+                            + ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
+                            + kills + " Killing Blows!";
 
-				} else if (type.equalsIgnoreCase("deaths")) {
+                    finalScore.add(finalString);
 
-					int deaths = score.getInt(topName + ".deaths");
+                } else if (type.equalsIgnoreCase("deaths")) {
 
-					int position = i + 1;
+                    int deaths = score.getInt(topName + ".deaths");
 
-					String finalString = ChatColor.DARK_AQUA + "[" + position
-							+ "] " + ChatColor.AQUA + topName
-							+ ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
-							+ deaths + " Deaths!";
+                    int position = i + 1;
 
-					finalScore.add(finalString);
+                    String finalString = ChatColor.DARK_AQUA + "[" + position
+                            + "] " + ChatColor.AQUA + topName
+                            + ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
+                            + deaths + " Deaths!";
 
-				} else if (type.equalsIgnoreCase("ratio")) {
+                    finalScore.add(finalString);
 
-					int kills = score.getInt(topName + ".kills");
-					int deaths = score.getInt(topName + ".deaths");
-					double ratio;
+                } else if (type.equalsIgnoreCase("ratio")) {
 
-					if (kills == 0 && deaths == 0) {
+                    int kills = score.getInt(topName + ".kills");
+                    int deaths = score.getInt(topName + ".deaths");
+                    double ratio;
 
-						ratio = 0.0;
+                    if (kills == 0 && deaths == 0) {
 
-					} else if (kills > 0 && deaths == 0) {
+                        ratio = 0.0;
 
-						ratio = kills;
+                    } else if (kills > 0 && deaths == 0) {
 
-					} else if (deaths > 0 && kills == 0) {
+                        ratio = kills;
 
-						ratio = -deaths;
+                    } else if (deaths > 0 && kills == 0) {
 
-					} else {
+                        ratio = -deaths;
 
-						ratio = (kills / deaths);
+                    } else {
 
-					}
+                        ratio = (kills / deaths);
 
-					ratio = Math.round(ratio * 100.0) / 100.0;
+                    }
 
-					int position = i + 1;
+                    ratio = Math.round(ratio * 100.0) / 100.0;
 
-					String finalString = ChatColor.DARK_AQUA + "[" + position
-							+ "] " + ChatColor.AQUA + topName
-							+ ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
-							+ ratio + " K/D Ratio!";
+                    int position = i + 1;
 
-					finalScore.add(finalString);
+                    String finalString = ChatColor.DARK_AQUA + "[" + position
+                            + "] " + ChatColor.AQUA + topName
+                            + ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
+                            + ratio + " K/D Ratio!";
 
-					player.sendMessage("instance 2");
+                    finalScore.add(finalString);
 
-				} else if (type.equalsIgnoreCase("streak")) {
+                    player.sendMessage("instance 2");
 
-					int streak = score.getInt(topName + ".streak");
+                } else if (type.equalsIgnoreCase("streak")) {
 
-					int position = i + 1;
+                    int streak = score.getInt(topName + ".streak");
 
-					String finalString = ChatColor.DARK_AQUA + "[" + position
-							+ "] " + ChatColor.AQUA + topName
-							+ ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
-							+ streak + " Kill Streak!";
+                    int position = i + 1;
 
-					finalScore.add(finalString);
-				}
+                    String finalString = ChatColor.DARK_AQUA + "[" + position
+                            + "] " + ChatColor.AQUA + topName
+                            + ChatColor.DARK_AQUA + " - " + ChatColor.AQUA
+                            + streak + " Kill Streak!";
 
-			} else
+                    finalScore.add(finalString);
+                }
 
-				break;
+            } else
 
-		}
+                break;
 
-		myTop5 = finalScore;
+        }
 
-		for (String blah : myTop5) {
+        myTop5 = finalScore;
 
-			player.sendMessage(blah);
+        for (String blah : myTop5) {
 
-		}
+            player.sendMessage(blah);
 
-	}
+        }
 
-	// API
-	public static ksAPI getAPI() {
-		return API;
-	}
+    }
 
-	// API
+    // API
+    public static ksAPI getAPI() {
+        return API;
+    }
 
-	public void HandleBrokenStreak(Player victim, Player killer, int killStreak) {
+    // API
 
-		int min = this.getConfig().getInt("MinimumStreak");
+    public void HandleBrokenStreak(Player victim, Player killer, int killStreak) {
 
-		if (!(killStreak >= min)) {
+        int min = this.getConfig().getInt("MinimumStreak");
 
-			return;
+        if (!(killStreak >= min)) {
 
-		}
+            return;
 
-		String msg = this.getConfig().getString("BrokenStreakMessage");
+        }
 
-		msg = msg.replaceAll("<killer>", killer.getName());
-		msg = msg.replaceAll("<victim>", victim.getName());
-		msg = msg.replaceAll("<streak>", Integer.toString(killStreak));
+        String msg = this.getConfig().getString("BrokenStreakMessage");
 
-		for (Player p : this.getServer().getOnlinePlayers()) {
+        msg = msg.replaceAll("<killer>", killer.getName());
+        msg = msg.replaceAll("<victim>", victim.getName());
+        msg = msg.replaceAll("<streak>", Integer.toString(killStreak));
 
-			if (p.getWorld().getName()
-					.equalsIgnoreCase(killer.getWorld().getName())) {
+        for (Player p : this.getServer().getOnlinePlayers()) {
 
-				p.sendMessage(replaceColors(msg));
+            if (p.getWorld().getName()
+                    .equalsIgnoreCase(killer.getWorld().getName())) {
 
-			} // same worlds
+                p.sendMessage(replaceColors(msg));
 
-		} // online players
+            } // same worlds
 
-	}
+        } // online players
 
-	public void HandleBroadcast(Player victim, Player killer, int killStreak) {
+    }
 
-		ConfigurationSection streaks = this.getConfig()
-				.getConfigurationSection("StreaksToBroadcast");
+    public void HandleBroadcast(Player victim, Player killer, int killStreak) {
 
-		for (String streak : streaks.getKeys(false)) {
+        ConfigurationSection streaks = this.getConfig()
+                .getConfigurationSection("StreaksToBroadcast");
 
-			int myStreak = Integer.parseInt(streak);
+        for (String streak : streaks.getKeys(false)) {
 
-			if (myStreak == killStreak) {
+            int myStreak = Integer.parseInt(streak);
 
-				String blah = Integer.toString(myStreak);
+            if (myStreak == killStreak) {
 
-				String msg = replaceColors(streaks.getString(blah));
+                String blah = Integer.toString(myStreak);
 
-				msg = msg.replaceAll("<player>", killer.getName());
-				msg = msg.replaceAll("<streak>", Integer.toString(killStreak));
+                String msg = replaceColors(streaks.getString(blah));
 
-				for (Player p : this.getServer().getOnlinePlayers()) {
+                msg = msg.replaceAll("<player>", killer.getName());
+                msg = msg.replaceAll("<streak>", Integer.toString(killStreak));
 
-					if (p.getWorld().getName()
-							.equalsIgnoreCase(killer.getWorld().getName())) {
+                for (Player p : this.getServer().getOnlinePlayers()) {
 
-						p.sendMessage(replaceColors(msg));
+                    if (p.getWorld().getName()
+                            .equalsIgnoreCase(killer.getWorld().getName())) {
 
-					} // same worlds
+                        p.sendMessage(replaceColors(msg));
 
-				} // online players
+                    } // same worlds
 
-			}
+                } // online players
 
-		}
+            }
 
-	}
+        }
 
-	public void logInfo(String name, String message) {
+    }
 
-		try {
+    public void logInfo(String name, String message) {
 
-			File file = new File(this.getDataFolder() + "/AdminLog.txt");
+        try {
 
-			if (!file.exists()) {
-				file.createNewFile();
-			}
+            File file = new File(this.getDataFolder() + "/AdminLog.txt");
 
-			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
 
-			BufferedWriter bw = new BufferedWriter(fw);
+            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
 
-			bw.append("[" + this.currentTime() + "] " + name + ": " + message);
+            BufferedWriter bw = new BufferedWriter(fw);
 
-			bw.newLine();
+            bw.append("[" + this.currentTime() + "] " + name + ": " + message);
 
-			bw.close();
+            bw.newLine();
 
-		} catch (IOException e) {
+            bw.close();
 
-			e.printStackTrace();
+        } catch (IOException e) {
 
-		}
+            e.printStackTrace();
 
-	}
+        }
 
-	public void logError(String message) {
+    }
 
-		try {
+    public void logError(String message) {
 
-			File file = new File(this.getDataFolder() + "/ErrorLog.txt");
+        try {
 
-			if (!file.exists()) {
-				file.createNewFile();
-			}
+            File file = new File(this.getDataFolder() + "/ErrorLog.txt");
 
-			FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
 
-			BufferedWriter bw = new BufferedWriter(fw);
+            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
 
-			bw.append("[" + this.currentTime() + "]  " + message);
+            BufferedWriter bw = new BufferedWriter(fw);
 
-			bw.newLine();
+            bw.append("[" + this.currentTime() + "]  " + message);
 
-			bw.close();
+            bw.newLine();
 
-		} catch (IOException e) {
+            bw.close();
 
-			e.printStackTrace();
+        } catch (IOException e) {
 
-		}
+            e.printStackTrace();
 
-	}
+        }
 
-	public String currentTime() {
-		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
-		Calendar cal = Calendar.getInstance();
-		return dateFormat.format(cal.getTime());
-	}
+    }
 
-	@SuppressWarnings("deprecation")
-	public void HandleRewards(Player player, Player victim, int currentStreak) {
+    public String currentTime() {
+        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm a");
+        Calendar cal = Calendar.getInstance();
+        return dateFormat.format(cal.getTime());
+    }
 
-		ConfigurationSection rewards = this.getConfig()
-				.getConfigurationSection("Rewards");
+    @SuppressWarnings("deprecation")
+    public void HandleRewards(Player player, Player victim, int currentStreak) {
 
-		String a = Integer.toString(currentStreak);
+        ConfigurationSection rewards = this.getConfig()
+                .getConfigurationSection("Rewards");
 
-		ConfigurationSection items = this.getConfig().getConfigurationSection(
-				"Rewards." + a);
+        String a = Integer.toString(currentStreak);
 
-		for (String streak : rewards.getKeys(false)) {
+        ConfigurationSection items = this.getConfig().getConfigurationSection(
+                "Rewards." + a);
 
-			int rewardStreak = Integer.parseInt(streak);
+        for (String streak : rewards.getKeys(false)) {
 
-			if (rewardStreak == currentStreak) {
+            int rewardStreak = Integer.parseInt(streak);
 
-				if (this.getConfig().getBoolean("AlertPlayer")) {
+            if (rewardStreak == currentStreak) {
 
-					String msg = this.getConfig().getString(
-							"AlertPlayerMessage");
+                if (this.getConfig().getBoolean("AlertPlayer")) {
 
-					msg = msg.replaceAll("<streak>",
-							Integer.toString(currentStreak));
-					msg = msg.replace("<victim>", victim.getName());
-					msg = msg.replace("<player>", player.getName());
-					msg = msg.replace("<killer>", player.getName());
+                    String msg = this.getConfig().getString(
+                            "AlertPlayerMessage");
 
-					msg = replaceColors(msg);
+                    msg = msg.replaceAll("<streak>",
+                            Integer.toString(currentStreak));
+                    msg = msg.replace("<victim>", victim.getName());
+                    msg = msg.replace("<player>", player.getName());
+                    msg = msg.replace("<killer>", player.getName());
 
-					player.sendMessage(msg);
+                    msg = replaceColors(msg);
 
-				}
+                    player.sendMessage(msg);
 
-				for (String item : items.getKeys(false)) {
+                }
 
-					String info = items.getString(item);
+                for (String item : items.getKeys(false)) {
 
-					String[] data = info.split(";");
+                    String info = items.getString(item);
 
-					if (data[0].equalsIgnoreCase("command")
-							|| data[0].equalsIgnoreCase("cmd")) {
+                    String[] data = info.split(";");
 
-						String cmd = data[1].replaceAll("<player>",
-								player.getName());
+                    if (data[0].equalsIgnoreCase("command")
+                            || data[0].equalsIgnoreCase("cmd")) {
 
-						cmd = cmd.replaceAll("<victim>", victim.getName());
+                        String cmd = data[1].replaceAll("<player>",
+                                player.getName());
 
-						if (data[1].startsWith("/")) {
+                        cmd = cmd.replaceAll("<victim>", victim.getName());
 
-							cmd = cmd.replaceFirst("/", "");
+                        if (data[1].startsWith("/")) {
 
-							if (player.isOp()) {
+                            cmd = cmd.replaceFirst("/", "");
 
-								player.performCommand(cmd);
+                            if (player.isOp()) {
 
-							} else {
+                                player.performCommand(cmd);
 
-								player.setOp(true);
+                            } else {
 
-								player.performCommand(cmd);
+                                player.setOp(true);
 
-								player.setOp(false);
+                                player.performCommand(cmd);
 
-							}
+                                player.setOp(false);
 
-						} else {
+                            }
 
-							if (player.isOp()) {
+                        } else {
 
-								player.performCommand(cmd);
+                            if (player.isOp()) {
 
-							} else {
+                                player.performCommand(cmd);
 
-								player.setOp(true);
+                            } else {
 
-								player.performCommand(cmd);
+                                player.setOp(true);
 
-								player.setOp(false);
+                                player.performCommand(cmd);
 
-							}
+                                player.setOp(false);
 
-						}
+                            }
 
-					} else if (data[0].contains(":")) {
+                        }
 
-						String[] extra = data[0].split(":");
+                    } else if (data[0].contains(":")) {
 
-						try {
-							ItemStack reward = new ItemStack(
-									Integer.parseInt(extra[0]),
-									Integer.parseInt(data[1]),
-									(short) Integer.parseInt(extra[1]));
+                        String[] extra = data[0].split(":");
 
-							if (player.getInventory().firstEmpty() == -1) {
+                        try {
+                            ItemStack reward = new ItemStack(
+                                    Integer.parseInt(extra[0]),
+                                    Integer.parseInt(data[1]),
+                                    (short) Integer.parseInt(extra[1]));
 
-								player.getWorld().dropItem(
-										player.getLocation(), reward);
-								player.sendMessage(ChatColor.DARK_AQUA
-										+ "[killStats] " + ChatColor.AQUA
-										+ Lang.FullInventory.toString());
+                            if (player.getInventory().firstEmpty() == -1) {
 
-							} else {
+                                player.getWorld().dropItem(
+                                        player.getLocation(), reward);
+                                player.sendMessage(ChatColor.DARK_AQUA
+                                        + "[killStats] " + ChatColor.AQUA
+                                        + Lang.FullInventory.toString());
 
-								player.getInventory().addItem(reward);
-								player.updateInventory();
+                            } else {
 
-							}
+                                player.getInventory().addItem(reward);
+                                player.updateInventory();
 
-						} catch (Exception ex) {
+                            }
 
-						}
+                        } catch (Exception ex) {
 
-					}
+                        }
 
-					try {
+                    }
 
-						ItemStack reward = new ItemStack(
-								Integer.parseInt(data[0]),
-								Integer.parseInt(data[1]));
+                    try {
 
-						if (player.getInventory().firstEmpty() == -1) {
+                        ItemStack reward = new ItemStack(
+                                Integer.parseInt(data[0]),
+                                Integer.parseInt(data[1]));
 
-							player.getWorld().dropItem(player.getLocation(),
-									reward);
-							player.sendMessage(ChatColor.DARK_AQUA
-									+ "[killStats] " + ChatColor.AQUA
-									+ Lang.FullInventory.toString());
+                        if (player.getInventory().firstEmpty() == -1) {
 
-						} else {
+                            player.getWorld().dropItem(player.getLocation(),
+                                    reward);
+                            player.sendMessage(ChatColor.DARK_AQUA
+                                    + "[killStats] " + ChatColor.AQUA
+                                    + Lang.FullInventory.toString());
 
-							player.getInventory().addItem(reward);
-							player.updateInventory();
+                        } else {
 
-						}
+                            player.getInventory().addItem(reward);
+                            player.updateInventory();
 
-					} catch (Exception ex) {
+                        }
 
-					}
+                    } catch (Exception ex) {
 
-				}
+                    }
 
-				/**
-				 * if(i.contains(":")){
-				 * 
-				 * String[] a = i.split(":"); int potion =
-				 * Integer.parseInt(a[1]);
-				 * 
-				 * ItemStack pBottle = new ItemStack(Material.POTION, amount,
-				 * (short) potion);
-				 * 
-				 * if(player.getInventory().firstEmpty() == -1){
-				 * 
-				 * player.getWorld().dropItem(player.getLocation(), pBottle);
-				 * player.sendMessage(ChatColor.DARK_AQUA + "[killStats] " +
-				 * ChatColor.AQUA +
-				 * "Not enough room in your inventory for your reward! It has been dropped on the ground."
-				 * );
-				 * 
-				 * }else{
-				 * 
-				 * player.getInventory().addItem(pBottle);
-				 * player.updateInventory();
-				 * 
-				 * }
-				 * 
-				 * }else{
-				 * 
-				 * int itemz = rewards.getInt(currentStreak + ".Item"); int
-				 * amountz = rewards.getInt(currentStreak + ".Amount");
-				 * 
-				 * ItemStack rItem = new ItemStack(itemz, amountz);
-				 * 
-				 * if(player.getInventory().firstEmpty() == -1){
-				 * 
-				 * player.getWorld().dropItem(player.getLocation(), rItem);
-				 * player.sendMessage(ChatColor.DARK_AQUA + "[killStats] " +
-				 * ChatColor.AQUA +
-				 * "Not enough room in your inventory for your reward! It has been dropped on the ground."
-				 * );
-				 * 
-				 * }else{
-				 * 
-				 * player.getInventory().addItem(rItem);
-				 * player.updateInventory();
-				 * 
-				 * }
-				 * 
-				 * }
-				 **/
-			}
+                }
 
-		} // for loop
+                /**
+                 * if(i.contains(":")){
+                 *
+                 * String[] a = i.split(":"); int potion =
+                 * Integer.parseInt(a[1]);
+                 *
+                 * ItemStack pBottle = new ItemStack(Material.POTION, amount,
+                 * (short) potion);
+                 *
+                 * if(player.getInventory().firstEmpty() == -1){
+                 *
+                 * player.getWorld().dropItem(player.getLocation(), pBottle);
+                 * player.sendMessage(ChatColor.DARK_AQUA + "[killStats] " +
+                 * ChatColor.AQUA +
+                 * "Not enough room in your inventory for your reward! It has been dropped on the ground."
+                 * );
+                 *
+                 * }else{
+                 *
+                 * player.getInventory().addItem(pBottle);
+                 * player.updateInventory();
+                 *
+                 * }
+                 *
+                 * }else{
+                 *
+                 * int itemz = rewards.getInt(currentStreak + ".Item"); int
+                 * amountz = rewards.getInt(currentStreak + ".Amount");
+                 *
+                 * ItemStack rItem = new ItemStack(itemz, amountz);
+                 *
+                 * if(player.getInventory().firstEmpty() == -1){
+                 *
+                 * player.getWorld().dropItem(player.getLocation(), rItem);
+                 * player.sendMessage(ChatColor.DARK_AQUA + "[killStats] " +
+                 * ChatColor.AQUA +
+                 * "Not enough room in your inventory for your reward! It has been dropped on the ground."
+                 * );
+                 *
+                 * }else{
+                 *
+                 * player.getInventory().addItem(rItem);
+                 * player.updateInventory();
+                 *
+                 * }
+                 *
+                 * }
+                 **/
+            }
 
-	}// handlerewards
+        } // for loop
 
-	public void DropHead(Player player) {
+    }// handlerewards
 
-		ItemStack i = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+    public void DropHead(Player player) {
 
-		SkullMeta meta = (SkullMeta) i.getItemMeta();
+        ItemStack i = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
 
-		meta.setOwner(player.getName());
+        SkullMeta meta = (SkullMeta) i.getItemMeta();
 
-		i.setItemMeta(meta);
+        meta.setOwner(player.getName());
 
-		player.getWorld().dropItem(player.getLocation(), i);
+        i.setItemMeta(meta);
 
-	}
+        player.getWorld().dropItem(player.getLocation(), i);
 
-	public boolean worldDisabled(World world) {
+    }
 
-		return disabledWorlds.contains(world.getName().toLowerCase());
+    public boolean worldDisabled(World world) {
 
-	}
+        return disabledWorlds.contains(world.getName().toLowerCase());
 
-	public boolean isBoosting(Player attacker, Player victim) {
+    }
 
-		String a = attacker.getName();
-		String v = victim.getName();
+    public boolean isBoosting(Player attacker, Player victim) {
 
-		int MaxKilling = this.getConfig().getInt("MaxKilling");
+        String a = attacker.getName();
+        String v = victim.getName();
 
-		int x = 0;
+        int MaxKilling = this.getConfig().getInt("MaxKilling");
 
-		for (String blah : deadList) {
+        int x = 0;
 
-			if (blah.equalsIgnoreCase(a + ":" + v)) {
+        for (String blah : deadList) {
 
-				x++;
+            if (blah.equalsIgnoreCase(a + ":" + v)) {
 
-			}
+                x++;
 
-		}
+            }
 
-		if (x == MaxKilling) {
+        }
 
-			return true;
+        if (x == MaxKilling) {
 
-		} else {
+            return true;
 
-			return false;
+        } else {
 
-		}
+            return false;
 
-	}
+        }
 
-	/**
-	 * Load the lang.yml file.
-	 * 
-	 * @return The lang.yml config.
-	 */
-	private void loadLang() {
+    }
 
-		File lang = new File(getDataFolder(), "lang.yml");
-		OutputStream out = null;
-		InputStream defLangStream = this.getResource("lang.yml");
-		if (!lang.exists()) {
-			try {
-				getDataFolder().mkdir();
-				lang.createNewFile();
-				if (defLangStream != null) {
-					out = new FileOutputStream(lang);
-					int read = 0;
-					byte[] bytes = new byte[1024];
+    /**
+     * Load the lang.yml file.
+     *
+     * @return The lang.yml config.
+     */
+    private void loadLang() {
 
-					while ((read = defLangStream.read(bytes)) != -1) {
-						out.write(bytes, 0, read);
-					}
-					YamlConfiguration defConfig = YamlConfiguration
-							.loadConfiguration(defLangStream);
-					Lang.setFile(defConfig);
-					return;
-				}
-			} catch (IOException e) {
-				e.printStackTrace(); // So they notice
-				log.severe("[killStats] Couldn't create language file.");
-				log.severe("[killStats] This is a fatal error. Now disabling");
-				this.setEnabled(false); // Without it loaded, we can't send them
-										// messages
-			} finally {
-				if (defLangStream != null) {
-					try {
-						defLangStream.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-				if (out != null) {
-					try {
-						out.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+        File lang = new File(getDataFolder(), "lang.yml");
+        OutputStream out = null;
+        InputStream defLangStream = this.getResource("lang.yml");
+        if (!lang.exists()) {
+            try {
+                getDataFolder().mkdir();
+                lang.createNewFile();
+                if (defLangStream != null) {
+                    out = new FileOutputStream(lang);
+                    int read = 0;
+                    byte[] bytes = new byte[1024];
 
-				}
-			}
-		}
+                    while ((read = defLangStream.read(bytes)) != -1) {
+                        out.write(bytes, 0, read);
+                    }
+                    YamlConfiguration defConfig = YamlConfiguration
+                            .loadConfiguration(defLangStream);
+                    Lang.setFile(defConfig);
+                    return;
+                }
+            } catch (IOException e) {
+                e.printStackTrace(); // So they notice
+                log.severe("[killStats] Couldn't create language file.");
+                log.severe("[killStats] This is a fatal error. Now disabling");
+                this.setEnabled(false); // Without it loaded, we can't send them
+                // messages
+            } finally {
+                if (defLangStream != null) {
+                    try {
+                        defLangStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-		YamlConfiguration conf = YamlConfiguration.loadConfiguration(lang);
-		for (Lang item : Lang.values()) {
-			if (conf.getString(item.getPath()) == null) {
-				conf.set(item.getPath(), item.getDefault().toString());
-			}
-		}
+                }
+            }
+        }
 
-		Lang.setFile(conf);
-		Main.LANG = conf;
-		Main.LANG_FILE = lang;
+        YamlConfiguration conf = YamlConfiguration.loadConfiguration(lang);
+        for (Lang item : Lang.values()) {
+            if (conf.getString(item.getPath()) == null) {
+                conf.set(item.getPath(), item.getDefault().toString());
+            }
+        }
 
-		try {
+        Lang.setFile(conf);
+        Main.LANG = conf;
+        Main.LANG_FILE = lang;
 
-			conf.save(getLangFile());
+        try {
 
-		} catch (IOException e) {
-			log.log(Level.WARNING, "killStats: Failed to save lang.yml.");
-			log.log(Level.WARNING,
-					"killStats: Report this stack trace to ImDeJay");
-			e.printStackTrace();
-		}
-	}
+            conf.save(getLangFile());
 
-	/**
-	 * Gets the lang.yml config.
-	 * 
-	 * @return The lang.yml config.
-	 */
-	public YamlConfiguration getLang() {
-		return LANG;
-	}
+        } catch (IOException e) {
+            log.log(Level.WARNING, "killStats: Failed to save lang.yml.");
+            log.log(Level.WARNING,
+                    "killStats: Report this stack trace to ImDeJay");
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Get the lang.yml file.
-	 * 
-	 * @return The lang.yml file.
-	 */
-	public File getLangFile() {
-		return LANG_FILE;
-	}
+    /**
+     * Gets the lang.yml config.
+     *
+     * @return The lang.yml config.
+     */
+    public YamlConfiguration getLang() {
+        return LANG;
+    }
+
+    /**
+     * Get the lang.yml file.
+     *
+     * @return The lang.yml file.
+     */
+    public File getLangFile() {
+        return LANG_FILE;
+    }
 
 } // End of plugin
