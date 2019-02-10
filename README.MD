@@ -1,6 +1,11 @@
 # Donald Crawford's Plugins
 Maintained repository with all of ImDeJay's Bukkit/Spigot page plugins.
 
+## IMPORTANT
+- Because only 1.8+ versions are available on the official Spigot Maven repository, and we want this code to be compilable for all... the plugins here have been updated only to support 1.8+ servers, and not previous versions. Subsequently, if these plugins don't work for your server, either update your server(if it's below version 1.8) or use the original plugins.
+
+- As far as I know, the plugins here should work for 1.8, however, these plugins have yet to be tested on any version.
+
 ### Why?
 A while ago, I contacted the author to check if the source code was available for his plugins because it no longer seemed to work anymore on newer servers.
 
